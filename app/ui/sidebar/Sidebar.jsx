@@ -58,7 +58,7 @@ const Sidebar = () => {
           </div>
 
           <ul className="mt-2">
-            <li className="px-4 py-2 flex items-center  text-gray-600">
+            <li className="px-4 py-2 flex items-center gap-4 text-gray-600">
               <LayoutDashboard/>
               <Link href={"/dashboard"} className="text-sm font-medium">Dashboard</Link>
             </li>
