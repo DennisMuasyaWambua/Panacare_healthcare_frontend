@@ -4,6 +4,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 First, run the development server:
 
+
+**design**: https://www.figma.com/design/CddhUjlpMZ3yCTHVkuvIx1/Panacare-administrator?node-id=1674-921&t=N2Sb9e8uDONDeVBt-1
 ```bash
 npm run dev
 # or
