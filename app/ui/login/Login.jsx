@@ -9,21 +9,33 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempted with:', { username, password });
-
-    // hitting the login endpoint 
-    // todo solve CORS errors in the login page
-    const data = {username,password};
-    var login = await fetch("http://127.0.0.1:8180/api/v1/user/login",{method:"POST", headers:{ 'Content-Type': 'application/json' },body:JSON.stringify(data)});
-    
-    const result  = await login.json();
-
-    console.log(result.data);
-
-
+  
+    const data = { username, password };
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8180/api/v1/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Login failed. Please check your credentials.");
+      }
+  
+      const result = await response.json();
+  
+      // Store the access token in local storage
+      localStorage.setItem("access_token", result.access_token);
+  
+      // Redirect to the dashboard
+      window.location.href = "/dashboard";
+    } catch (error) {
+      console.error("Error during login:", error.message);
+      alert("Login failed. Please try again.");
+    }
   };
   return (
     <div className="flex flex-col md:flex-row h-screen w-screen">
@@ -46,7 +58,7 @@ const Login = () => {
                 <span className="ml-2 text-black text-xs">Username</span>
               </div>
               <Image src="/logo.jpg" alt="panacarelogo.png"width={100} height={100}/>
-              <div className="w-4 h-4"></div> {/* Placeholder for icon */}
+              <div className="w-4 h-4"></div>
             </div>
             
             {/* Content Area */}
