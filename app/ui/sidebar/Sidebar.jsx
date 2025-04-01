@@ -1,8 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { Menu, X, Search, ChevronDown } from "lucide-react";
+import { Menu, X, Search, ChevronDown, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const Sidebar = () => {
+  const pathname = usePathname();
+  console.log(pathname);
+  const isActive = (path) => pathname === path;
+  const isActiveSub = (path) => pathname.startsWith(path);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -30,12 +38,13 @@ const Sidebar = () => {
         `}
       >
         {/* Logo */}
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center">
-            <div className="text-blue-500 font-bold text-lg">
-              Pana<span className="text-red-500">Care</span>
+        <div className="px-4 py-3 border-b border-gray-700 w-3/4 mx-auto">
+          <div className="flex items-center justify-center">
+            <div className="text-blue-500 font-bold text-lg image-container">
+              {/* Pana<span className="text-red-500">Care</span> */}
+              <Image src={"/logo.jpg"} width={154} height={35} alt="Panacare Logo"/>
             </div>
-            <span className="ml-3 text-gray-500 text-sm">Dashboard</span>
+            {/* <span className="ml-3 text-gray-500 text-sm">Dashboard</span> */}
           </div>
         </div>
 
@@ -49,15 +58,9 @@ const Sidebar = () => {
           </div>
 
           <ul className="mt-2">
-            <li className="px-4 py-2 flex items-center text-blue-500 bg-blue-50 border-l-4 border-blue-500">
-              <svg
-                className="w-5 h-5 mr-3"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <rect width="20" height="20" x="2" y="2" rx="2" />
-              </svg>
-              <span className="text-sm font-medium">Dashboard</span>
+            <li className="px-4 py-2 flex items-center  text-gray-600">
+              <LayoutDashboard/>
+              <Link href={"/dashboard"} className="text-sm font-medium">Dashboard</Link>
             </li>
 
             <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
@@ -69,7 +72,7 @@ const Sidebar = () => {
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8H4z" />
               </svg>
-              <span className="text-sm">App Users</span>
+              <Link href={"/dashboard/patients"} className="text-sm">View patients</Link>
             </li>
 
             <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
