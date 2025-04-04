@@ -1,6 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { Menu, X, Search, ChevronDown, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  X,
+  Search,
+  ChevronDown,
+  LayoutDashboard,
+  User2Icon,
+} from "lucide-react";
+import { FaClinicMedical, FaDiagnoses } from "react-icons/fa";
+import { MdWifiProtectedSetup } from "react-icons/md";
+import { VscOrganization } from "react-icons/vsc";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -19,6 +29,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile sidebar toggle */}
+
       <div className="md:hidden fixed top-4 left-4 z-20">
         <button
           onClick={toggleSidebar}
@@ -42,7 +53,12 @@ const Sidebar = () => {
           <div className="flex items-center justify-center">
             <div className="text-blue-500 font-bold text-lg image-container">
               {/* Pana<span className="text-red-500">Care</span> */}
-              <Image src={"/logo.jpg"} width={154} height={35} alt="Panacare Logo"/>
+              <Image
+                src={"/logo.jpg"}
+                width={154}
+                height={35}
+                alt="Panacare Logo"
+              />
             </div>
             {/* <span className="ml-3 text-gray-500 text-sm">Dashboard</span> */}
           </div>
@@ -58,67 +74,106 @@ const Sidebar = () => {
           </div>
 
           <ul className="mt-2">
-            <li className="px-4 py-2 flex items-center gap-4 text-gray-600">
-              <LayoutDashboard/>
-              <Link href={"/dashboard"} className="text-sm font-medium">Dashboard</Link>
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <LayoutDashboard
+                className={`${
+                  isActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <Link href={"/dashboard"} className="text-sm font-medium">
+                Dashboard
+              </Link>
             </li>
 
-            <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
-              <svg
-                className="w-5 h-5 mr-3 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard/patients")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <User2Icon
+                className={`${
+                  isActive("/dashboard/patients")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <Link
+                href={"/dashboard/patients"}
+                className="text-base font-medium"
               >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8H4z" />
-              </svg>
-              <Link href={"/dashboard/patients"} className="text-sm">View patients</Link>
+                View Doctors
+              </Link>
             </li>
 
-            <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
-              <svg
-                className="w-5 h-5 mr-3 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M20 14V8H4v6h8l4 4v-4h4z" />
-              </svg>
-              <span className="text-sm">App Content</span>
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard/clinics")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <FaClinicMedical
+                className={`${
+                  isActive("/dashboard/clinics")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <span className="text-base font-medium">Manage Clinics</span>
             </li>
 
-            <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
-              <svg
-                className="w-5 h-5 mr-3 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 12l-8 4V6l8-4 8 4v10l-8 4z" />
-              </svg>
-              <span className="text-sm">Manage Units</span>
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard/system-setup")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <MdWifiProtectedSetup
+                className={`${
+                  isActive("/dashboard/system-setup")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <span className="text-base font-medium">System Setup</span>
+              <ChevronDown
+                className={`${
+                  isActive("/dashboard/system-setup")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
             </li>
 
-            <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
-              <svg
-                className="w-5 h-5 mr-3 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M4 4h16v6H4V4zm0 10h16v6H4v-6z" />
-              </svg>
-              <span className="text-sm">System Vitals</span>
-              <ChevronDown size={16} className="ml-auto" />
-            </li>
-
-            <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-50">
-              <svg
-                className="w-5 h-5 mr-3 text-gray-400"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4zm0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z" />
-              </svg>
-              <span className="text-sm">Manage Users</span>
-              <ChevronDown size={16} className="ml-auto" />
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard/manage-users")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <VscOrganization
+                className={`${
+                  isActive("/dashboard/manage-users")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <span className="text-base font-medium">Manage Users</span>
+              <ChevronDown
+                className={`${
+                  isActive("/dashboard/manage-users")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
             </li>
           </ul>
         </nav>

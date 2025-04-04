@@ -7,285 +7,250 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronUp, ChevronDown, Search } from "lucide-react";
 
 const sampleData1 = [
-  { name: "1 Sep", value: 10 },
-  { name: "5 Sep", value: 15 },
-  { name: "10 Sep", value: 8 },
-  { name: "15 Sep", value: 12 },
-  { name: "20 Sep", value: 18 },
-  { name: "25 Sep", value: 15 },
-  { name: "30 Sep", value: 20 },
+  { name: "Jan", value: 10000 },
+  { name: "Feb", value: 15000 },
+  { name: "Mar", value: 12000 },
+  { name: "Apr", value: 18000 },
+  { name: "May", value: 20000 },
+  { name: "Jun", value: 22000 },
+  { name: "Jul", value: 25000 },
+  { name: "Aug", value: 23000 },
+  { name: "Sep", value: 24000 },
+  { name: "Oct", value: 26000 },
+  { name: "Nov", value: 28000 },
+  { name: "Dec", value: 30000 },
 ];
 
 const sampleData2 = [
-  { name: "1 Sep", patientsValue: 10, doctorsValue: 8, hospitalsValue: 12 },
-  { name: "5 Sep", patientsValue: 12, doctorsValue: 15, hospitalsValue: 10 },
-  { name: "10 Sep", patientsValue: 8, doctorsValue: 10, hospitalsValue: 14 },
-  { name: "15 Sep", patientsValue: 15, doctorsValue: 7, hospitalsValue: 9 },
-  { name: "20 Sep", patientsValue: 18, doctorsValue: 12, hospitalsValue: 15 },
-  { name: "25 Sep", patientsValue: 15, doctorsValue: 18, hospitalsValue: 13 },
-  { name: "30 Sep", patientsValue: 20, doctorsValue: 15, hospitalsValue: 17 },
+  { name: "Jan", active: 20000, inactive: 5000 },
+  { name: "Feb", active: 22000, inactive: 4000 },
+  { name: "Mar", active: 21000, inactive: 4500 },
+  { name: "Apr", active: 23000, inactive: 4000 },
+  { name: "May", active: 25000, inactive: 3500 },
+  { name: "Jun", active: 27000, inactive: 3000 },
+  { name: "Jul", active: 29000, inactive: 2500 },
+  { name: "Aug", active: 28000, inactive: 3000 },
+  { name: "Sep", active: 30000, inactive: 2000 },
+  { name: "Oct", active: 32000, inactive: 1500 },
+  { name: "Nov", active: 34000, inactive: 1000 },
+  { name: "Dec", active: 36000, inactive: 500 },
 ];
 
 const Dashboard = () => {
-  // Analytics card data
-  const analyticsCards = [
-    {
-      title: "Patients",
-      totalValue: "948,558",
-      growthValue: "79,046",
-      growthUp: true,
-      chartData1: sampleData1,
-      chartData2: sampleData2,
-      compareValue: "200,558",
-      compareUp: false,
-      percentValue: "16,558",
-      percentUp: false,
-    },
-    {
-      title: "Doctors",
-      totalValue: "948,558",
-      growthValue: "79,046",
-      growthUp: true,
-      chartData1: sampleData1,
-      chartData2: sampleData2,
-      compareValue: "200,558",
-      compareUp: false,
-      percentValue: "16,558",
-      percentUp: false,
-    },
-    {
-      title: "Hospitals",
-      totalValue: "948,558",
-      growthValue: "79,046",
-      growthUp: true,
-      chartData1: sampleData1,
-      chartData2: sampleData2,
-      compareValue: "200,558",
-      compareUp: false,
-      percentValue: "16,558",
-      percentUp: false,
-    },
-    {
-      title: "Number of Subscriptions",
-      totalValue: "948,558",
-      growthValue: "79,046",
-      growthUp: true,
-      chartData1: sampleData1,
-      chartData2: sampleData2,
-      compareValue: "200,558",
-      compareUp: false,
-      percentValue: "16,558",
-      percentUp: false,
-    },
-  ];
-
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Top Navigation */}
-        <header className="bg-white shadow-sm px-4 py-3 flex justify-end">
-          <div className="flex items-center text-sm text-gray-600">
-            <span>View as Admin</span>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="p-4 md:p-6">
-          {analyticsCards.map((card, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm mb-6 p-4">
-              <h2 className="text-blue-500 text-lg font-medium mb-4">
-                {card.title}
-              </h2>
-
-              {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">
-                    TOTAL NUMBER OF {card.title.toUpperCase()}
-                  </div>
-                  <div className="text-xl font-bold text-purple-600">
-                    {card.totalValue}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">
-                    GROWTH (MONTHLY)
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-xl font-bold text-purple-600">
-                      {card.growthValue}
-                    </span>
-                    {card.growthUp ? (
-                      <ChevronUp className="ml-2 text-green-500" size={18} />
-                    ) : (
-                      <ChevronDown className="ml-2 text-red-500" size={18} />
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">
-                    COMPARED TO LAST MONTH
-                  </div>
-                  <div className="flex items-center">
-                    <span className="text-xl font-bold text-purple-600">
-                      {card.compareValue}
-                    </span>
-                    {card.compareUp ? (
-                      <ChevronUp className="ml-2 text-green-500" size={18} />
-                    ) : (
-                      <ChevronDown className="ml-2 text-red-500" size={18} />
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">PERCENTAGE</div>
-                  <div className="flex items-center">
-                    <span className="text-xl font-bold text-purple-600">
-                      {card.percentValue}
-                    </span>
-                    {card.percentUp ? (
-                      <ChevronUp className="ml-2 text-green-500" size={18} />
-                    ) : (
-                      <ChevronDown className="ml-2 text-red-500" size={18} />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Charts Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Chart 1 */}
-                <div>
-                  <div className="mb-2">
-                    <span className="text-xs text-gray-500">
-                      AVERAGE MONTHLY {card.title.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="text-xs text-blue-500 mb-2">
-                    Total Patients
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={card.chartData1}
-                        margin={{
-                          top: 10,
-                          right: 30,
-                          left: 0,
-                          bottom: 10,
-                        }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                          tickFormatter={(value) => value}
-                        />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="value"
-                          stroke="#38b2ac"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* Chart 2 */}
-                <div>
-                  <div className="mb-2">
-                    <span className="text-xs text-gray-500">
-                      ACTUAL PATIENTS VS EXPECTED PATIENTS
-                    </span>
-                  </div>
-                  <div className="flex text-xs mb-2">
-                    <div className="mr-4">
-                      <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span>
-                      <span className="text-blue-500">Actual Patients</span>
-                    </div>
-                    <div>
-                      <span className="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span>
-                      <span className="text-red-500">Expected Patients</span>
-                    </div>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={card.chartData2}
-                        margin={{
-                          top: 10,
-                          right: 30,
-                          left: 0,
-                          bottom: 10,
-                        }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <YAxis
-                          tick={{ fontSize: 10 }}
-                          axisLine={false}
-                          tickLine={false}
-                          tickFormatter={(value) => value}
-                        />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="patientsValue"
-                          stroke="#3182ce"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="doctorsValue"
-                          stroke="#e53e3e"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="hospitalsValue"
-                          stroke="#805ad5"
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 6 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </main>
+    <div className="p-6 px-6 bg-gray-50 min-h-screen">
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="flex items-center bg-white shadow-sm rounded-lg px-4 py-2">
+          <Search className="text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search an item"
+            className="ml-2 w-[369px] border-none focus:outline-none text-gray-600"
+          />
+        </div>
       </div>
+
+      {/* Patients Section */}
+      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Patients</h1>
+      <Section
+        title="Patients"
+        firstCard={[
+          { label: "Registered Patients", value: "948,558", trend: "up" },
+          { label: "Average Monthly Patients", value: "79,046", trend: "up" },
+        ]}
+        secondCard={[
+          { label: "Total Active Patients", value: "200,558", trend: "up" },
+          { label: "Total Inactive Patients", value: "16,558", trend: "down" },
+        ]}
+        charts={[
+          {
+            title: "Average Monthly Patients",
+            data: sampleData1,
+            dataKey: "value",
+          },
+          {
+            title: "Active Patients vs Inactive Patients",
+            data: sampleData2,
+            lines: [
+              { dataKey: "active", color: "#38a169" },
+              { dataKey: "inactive", color: "#e53e3e" },
+            ],
+          },
+        ]}
+      />
+
+      {/* Doctors Section */}
+      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Doctors</h1>
+      <Section
+        title="Doctors"
+        firstCard={[
+          { label: "Registered Doctors", value: "12,345", trend: "up" },
+          { label: "Average Monthly Doctors", value: "1,234", trend: "up" },
+        ]}
+        secondCard={[
+          { label: "Total Active Doctors", value: "10,123", trend: "up" },
+          { label: "Total Inactive Doctors", value: "2,222", trend: "down" },
+        ]}
+        charts={[
+          {
+            title: "Average Monthly Doctors",
+            data: sampleData1,
+            dataKey: "value",
+          },
+          {
+            title: "Active Doctors vs Inactive Doctors",
+            data: sampleData2,
+            lines: [
+              { dataKey: "active", color: "#38a169" },
+              { dataKey: "inactive", color: "#e53e3e" },
+            ],
+          },
+        ]}
+      />
+
+      {/* Hospitals Section */}
+      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Hospitals</h1>
+      <Section
+        title="Hospitals"
+        firstCard={[
+          { label: "Registered Facilities", value: "5,678", trend: "up" },
+          { label: "Average Monthly Facilities", value: "567", trend: "up" },
+        ]}
+        secondCard={[
+          { label: "Total Active Facilities", value: "4,890", trend: "up" },
+          { label: "Total Inactive Facilities", value: "788", trend: "down" },
+        ]}
+        charts={[
+          {
+            title: "Average Monthly Facilities",
+            data: sampleData1,
+            dataKey: "value",
+          },
+          {
+            title: "Active Facilities vs Inactive Facilities",
+            data: sampleData2,
+            lines: [
+              { dataKey: "active", color: "#38a169" },
+              { dataKey: "inactive", color: "#e53e3e" },
+            ],
+          },
+        ]}
+      />
+
+      {/* Subscriptions Section */}
+      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">
+        Number of Subscriptions
+      </h1>
+      <Section
+        title="Subscriptions"
+        firstCard={[
+          { label: "Basic Package", value: "1,234", trend: "up" },
+          { label: "Bronze Package", value: "567", trend: "up" },
+        ]}
+        secondCard={[
+          { label: "Silver Package", value: "890", trend: "up" },
+          { label: "Gold Package", value: "345", trend: "up" },
+        ]}
+        charts={[]}
+      />
     </div>
   );
 };
+
+const Section = ({ title, firstCard, secondCard, charts }) => (
+  <div className="mb-12">
+    {/* Statistics Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* First Combined Card */}
+      <Card items={firstCard} />
+      {/* Second Combined Card */}
+      <Card items={secondCard} />
+    </div>
+
+    {/* Charts Section */}
+    {charts.length > 0 && (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {charts.map((chart, index) => (
+          <Chart
+            key={index}
+            title={chart.title}
+            data={chart.data}
+            lines={chart.lines}
+            dataKey={chart.dataKey}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const Card = ({ items }) => (
+  <div className="bg-white shadow-sm rounded-lg p-4 flex items-center">
+    {items.map((item, index) => (
+      <React.Fragment key={index}>
+        <div className="flex-1">
+          <h2 className="text-gray-500 text-sm mb-2">{item.label}</h2>
+          <div className="flex items-center">
+            <span className="text-2xl font-bold text-[#7F375E]">
+              {item.value}
+            </span>
+            {item.trend === "up" ? (
+              <ChevronUp className="ml-2 text-green-500" size={20} />
+            ) : (
+              <ChevronDown className="ml-2 text-red-500" size={20} />
+            )}
+          </div>
+        </div>
+        {index < items.length - 1 && (
+          <div className="w-[2px] h-full bg-[#707070] mx-4"></div>
+        )}
+      </React.Fragment>
+    ))}
+  </div>
+);
+
+const Chart = ({ title, data, lines, dataKey }) => (
+  <div className="bg-white shadow-sm rounded-lg p-4">
+    <h2 className="text-[#7F375E] text-sm mb-4">{title}</h2>
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip />
+          {lines ? (
+            lines.map((line, index) => (
+              <Line
+                key={index}
+                type="monotone"
+                dataKey={line.dataKey}
+                stroke={line.color}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 6 }}
+              />
+            ))
+          ) : (
+            <Line
+              type="monotone"
+              dataKey={dataKey}
+              stroke="#3182ce"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+);
 
 export default Dashboard;
