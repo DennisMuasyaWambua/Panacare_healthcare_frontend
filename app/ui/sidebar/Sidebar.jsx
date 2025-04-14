@@ -8,7 +8,7 @@ import {
   LayoutDashboard,
   User2Icon,
 } from "lucide-react";
-import { FaClinicMedical, FaDiagnoses } from "react-icons/fa";
+import { FaClinicMedical, FaDiagnoses, FaUserNurse } from "react-icons/fa";
 import { MdWifiProtectedSetup } from "react-icons/md";
 import { VscOrganization } from "react-icons/vsc";
 import Link from "next/link";
@@ -105,6 +105,28 @@ const Sidebar = () => {
               />
               <Link
                 href={"/dashboard/patients"}
+                className="text-base font-medium"
+              >
+                View Patients
+              </Link>
+            </li>
+
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                isActive("/dashboard/doctors")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <FaUserNurse
+                className={`${
+                  isActive("/dashboard/doctors")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`}
+              />
+              <Link
+                href={"/dashboard/doctors"}
                 className="text-base font-medium"
               >
                 View Doctors

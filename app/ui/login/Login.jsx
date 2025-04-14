@@ -57,7 +57,7 @@ const Login = () => {
                 <div className="w-8 h-8 rounded-full bg-gray-300"></div>
                 <span className="ml-2 text-black text-xs">Username</span>
               </div>
-              <Image src="/logo.jpg" alt="panacarelogo.png"width={100} height={100}/>
+              <Image src="/logo.jpg" alt="panacarelogo.png" width={100} height={100}/>
               <div className="w-4 h-4"></div>
             </div>
             
