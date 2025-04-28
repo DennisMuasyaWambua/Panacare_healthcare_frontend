@@ -39,12 +39,12 @@ const AddDoctor = () => {
             <input
               type="text"
               placeholder="Enter Registration Number"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-black mb-2">Salutation</label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+            <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
               <option value="Dr.">Dr.</option>
               <option value="Prof.">Prof.</option>
               <option value="Mr.">Mr.</option>
@@ -56,14 +56,14 @@ const AddDoctor = () => {
             <input
               type="text"
               placeholder="Dr. Jude Doe"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none"
             />
           </div>
 
           {/* Row 2 */}
           <div>
             <label className="block text-black mb-2">Speciality</label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+            <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
               <option value="Gynaecologist">Gynaecologist</option>
               <option value="Cardiologist">Cardiologist</option>
               <option value="Dentist">Dentist</option>
@@ -72,7 +72,7 @@ const AddDoctor = () => {
           </div>
           <div>
             <label className="block text-black mb-2">Other Qualification (Optional)</label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+            <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
               <option value="Dentist">Dentist</option>
               <option value="Surgeon">Surgeon</option>
               <option value="Orthopedic">Orthopedic</option>
@@ -80,7 +80,7 @@ const AddDoctor = () => {
           </div>
           <div>
             <label className="block text-black mb-2">Years of Practice</label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+            <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
               <option value="1 Year">1 Year</option>
               <option value="5 Years">5 Years</option>
               <option value="8 Years">8 Years</option>
@@ -96,7 +96,7 @@ const AddDoctor = () => {
             <input
               type="text"
               placeholder="+254 700 000000"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none"
             />
           </div>
           <div>
@@ -104,7 +104,7 @@ const AddDoctor = () => {
             <input
               type="email"
               placeholder="Sample@Email.Com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none"
             />
           </div>
         </div>
@@ -118,7 +118,7 @@ const AddDoctor = () => {
           <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-black mb-2">Level of Education</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+              <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
                 <option value="Bachelor's">Bachelor's</option>
                 <option value="Master's">Master's</option>
                 <option value="PhD">PhD</option>
@@ -126,7 +126,7 @@ const AddDoctor = () => {
             </div>
             <div>
               <label className="block text-black mb-2">Field</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+              <select className="w-full px-4 py-2 border border-gray-300 text-black rounded-lg focus:outline-none">
                 <option value="Gynaecology">Gynaecology</option>
                 <option value="Cardiology">Cardiology</option>
                 <option value="Dentistry">Dentistry</option>
@@ -134,7 +134,7 @@ const AddDoctor = () => {
             </div>
             <div>
               <label className="block text-black mb-2">University/College</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none">
+              <select className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:outline-none">
                 <option value="Harvard">Harvard</option>
                 <option value="Oxford">Oxford</option>
                 <option value="Stanford">Stanford</option>

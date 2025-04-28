@@ -4,22 +4,25 @@ import Head from 'next/head';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const data = { username, password };
+    const data = { email, password };
   
     try {
-      const response = await fetch("http://127.0.0.1:8180/api/v1/user/login", {
+      const response = await fetch("http://panacaredjangobackend-production.up.railway.app/api/users/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
+        console.log(data)
   
       if (!response.ok) {
         throw new Error("Login failed. Please check your credentials.");
@@ -29,12 +32,17 @@ const Login = () => {
   
       // Store the access token in local storage
       localStorage.setItem("access_token", result.access_token);
-  
-      // Redirect to the dashboard
+      toast.success("Login successful!");
+
+      setTimeout(() => {
+        // Redirect to the dashboard
       window.location.href = "/dashboard";
+      }, 2000);
+
+      
     } catch (error) {
       console.error("Error during login:", error.message);
-      alert("Login failed. Please try again.");
+      toast.error("Login failed. Please try again.");
     }
   };
   return (
@@ -55,7 +63,7 @@ const Login = () => {
             <div className="flex justify-between items-center p-2">
               <div className="flex items-center">
                 <div className="w-8 h-8 rounded-full bg-gray-300"></div>
-                <span className="ml-2 text-black text-xs">Username</span>
+                <span className="ml-2 text-black text-xs">Email</span>
               </div>
               <Image src="/logo.jpg" alt="panacarelogo.png" width={100} height={100}/>
               <div className="w-4 h-4"></div>
@@ -130,22 +138,22 @@ const Login = () => {
         
         <form onSubmit={handleSubmit} className="w-full">
           <div className="mb-6">
-            <label htmlFor="username" className="block text-sm font-medium text-grey-600 mb-1">
-              Enter your username
+            <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
+              Enter your email
             </label>
             <input
-              type="username"
-              id="username"
+              type="email"
+              id="email"
               className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-600 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-balck mb-1">
               Password
             </label>
             <input
