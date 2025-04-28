@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Search, MoreVertical } from "lucide-react";
+import {DoctorDetailsPopup} from "../viewDoctor/DoctorDetailsPopup"
 
-const ListofDoctors = () => {
+const ListOfDoctors = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [doctors, setDoctors] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null); 
 
   // Sample doctor data
   const sampleDoctors = [
@@ -61,9 +63,8 @@ const ListofDoctors = () => {
   });
 
   const handleNavigate = () => {
-    // Navigate to the Add Doctor page
     window.location.href = "/dashboard/doctors/add";
-  }
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -161,7 +162,13 @@ const ListofDoctors = () => {
                     onChange={() => handleRowSelect(doctor.id)}
                   />
                 </td>
-                <td className="px-4 py-2 text-black">{doctor.name}</td>
+                {/* Trigger popup on name click */}
+                <td
+                  className="px-4 py-2 text-black cursor-pointer"
+                  onClick={() => setSelectedDoctor(doctor)}
+                >
+                  {doctor.name}
+                </td>
                 <td className="px-4 py-2 text-black">{doctor.phone}</td>
                 <td className="px-4 py-2 text-black">{doctor.email}</td>
                 <td className="px-4 py-2 text-black">{doctor.specialty}</td>
@@ -183,8 +190,16 @@ const ListofDoctors = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Conditionally render the */}
+      {selectedDoctor && (
+        <DoctorDetailsPopup
+          doctor={selectedDoctor}
+          onClose={() => setSelectedDoctor(null)}
+        />
+      )}
     </div>
   );
 };
 
-export default ListofDoctors;
+export default ListOfDoctors;
