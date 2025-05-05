@@ -16,7 +16,7 @@ const Login = () => {
     const data = { email, password };
   
     try {
-      const response = await fetch("http://panacaredjangobackend-production.up.railway.app/api/users/login/", {
+      const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -32,6 +32,7 @@ const Login = () => {
   
       // Store the access token in local storage
       localStorage.setItem("access_token", result.access_token);
+      // strore the first name in local storage
       toast.success("Login successful!");
 
       setTimeout(() => {

@@ -14,6 +14,8 @@ const AddDoctor = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // send data to the server
+    
     // Simulate successful submission
     setShowSuccessModal(true);
   };
