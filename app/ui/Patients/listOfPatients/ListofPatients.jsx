@@ -20,6 +20,7 @@ const ListofPatients = () => {
         setIsLoading(true);
         setError(null);
         const data = await patientsAPI.getAllPatients();
+        console.log(data);
         setPatients(data);
       } catch (error) {
         console.error("Error fetching patients:", error);
@@ -84,7 +85,7 @@ const ListofPatients = () => {
     setModalPatient(null);
   };
 
-  const filteredPatients = patients.filter((patient) => {
+  const filteredPatients = (Array.isArray(patients) ? patients : []).filter((patient) => {
     const matchesSearch =
       patient.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDoctorId =
@@ -93,7 +94,7 @@ const ListofPatients = () => {
       statusFilter === "All" || patient.status === statusFilter;
 
     return matchesSearch && matchesDoctorId && matchesStatus;
-  });
+});
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen relative">
