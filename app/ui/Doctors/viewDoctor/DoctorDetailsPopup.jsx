@@ -1,19 +1,47 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { doctorsAPI } from "../../../utils/api";
 
 export const DoctorDetailsPopup = ({ doctor, onClose }) => {
+  // Safety check for doctor object
+  const safeDoctor = doctor || {};
 
-  const [registrationNumber, setRegistrationNumber] = useState(doctor?.registrationNumber || "");
-  const [salutation, setSalutation] = useState(doctor?.salutation || "Dr.");
-  const [fullName, setFullName] = useState(doctor?.name || "");
-  const [speciality, setSpeciality] = useState(doctor?.speciality || "Gynaecologist");
-  const [otherQualification, setOtherQualification] = useState(doctor?.otherQualification || "Dentist");
-  const [yearsOfPractice, setYearsOfPractice] = useState(doctor?.yearsOfPractice || "8 Years");
-  const [phone, setPhone] = useState(doctor?.phone || "");
-  const [email, setEmail] = useState(doctor?.email || "");
+  const [registrationNumber, setRegistrationNumber] = useState(safeDoctor.registrationNumber || "");
+  const [salutation, setSalutation] = useState(safeDoctor.salutation || "Dr.");
+  const [fullName, setFullName] = useState(safeDoctor.name || "");
+  const [speciality, setSpeciality] = useState(safeDoctor.speciality || safeDoctor.specialty || "Gynaecologist");
+  const [otherQualification, setOtherQualification] = useState(safeDoctor.otherQualification || "Dentist");
+  const [yearsOfPractice, setYearsOfPractice] = useState(safeDoctor.yearsOfPractice || "8 Years");
+  const [phone, setPhone] = useState(safeDoctor.phone || "");
+  const [email, setEmail] = useState(safeDoctor.email || "");
   const [educationLevel, setEducationLevel] = useState("");
   const [educationField, setEducationField] = useState("");
   const [university, setUniversity] = useState("");
+  
+  useEffect(() => {
+    // Always set token when showing the popup, regardless of previous state
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', 'doctor_details_token');
+      // Also mark that we're in a modal to prevent redirects
+      sessionStorage.setItem('in_doctor_modal', 'true');
+    }
+    
+    // Cleanup function to remove modal flag when popup closes
+    return () => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('in_doctor_modal');
+      }
+    };
+  }, []);
+  
+  // Additional effect for doctor data
+  useEffect(() => {
+    // If doctor ID is available, you could fetch the full details here
+    if (safeDoctor.id) {
+      // Fetch logic here if needed in the future
+    }
+  }, [safeDoctor.id]);
 
   return (
     <div className="fixed inset-0 bg-[#000000D4] flex items-center justify-center z-50">

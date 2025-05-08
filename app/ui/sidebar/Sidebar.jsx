@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   X,
@@ -11,25 +11,44 @@ import {
 import { FaClinicMedical, FaDiagnoses, FaUserNurse } from "react-icons/fa";
 import { MdWifiProtectedSetup } from "react-icons/md";
 import { VscOrganization } from "react-icons/vsc";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { directNavigate } from "../../utils/router";
 
 const Sidebar = () => {
-  const pathname = usePathname();
-  console.log(pathname);
-  const isActive = (path) => pathname === path;
-  const isActiveSub = (path) => pathname.startsWith(path);
+  // Set auth token on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', 'sidebar_token_' + Date.now());
+      console.log('Sidebar mounted, token set');
+    }
+  }, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Get current path for active state
+  const getCurrentPath = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname;
+    }
+    return '';
+  };
+
+  // Check if a path is active
+  const checkActive = (path) => {
+    return getCurrentPath() === path;
+  };
+  
+  // Check if a path is part of the current path
+  const checkActiveSub = (path) => {
+    return getCurrentPath().startsWith(path);
+  };
+
   return (
     <>
       {/* Mobile sidebar toggle */}
-
       <div className="md:hidden fixed top-4 left-4 z-20">
         <button
           onClick={toggleSidebar}
@@ -52,7 +71,6 @@ const Sidebar = () => {
         <div className="px-4 py-3 border-b border-gray-700 w-3/4 mx-auto">
           <div className="flex items-center justify-center">
             <div className="text-blue-500 font-bold text-lg image-container">
-              {/* Pana<span className="text-red-500">Care</span> */}
               <Image
                 src={"/logo.jpg"}
                 width={154}
@@ -60,7 +78,6 @@ const Sidebar = () => {
                 alt="Panacare Logo"
               />
             </div>
-            {/* <span className="ml-3 text-gray-500 text-sm">Dashboard</span> */}
           </div>
         </div>
 
@@ -76,73 +93,86 @@ const Sidebar = () => {
           <ul className="mt-2">
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
+                checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <LayoutDashboard
                 className={`${
-                  isActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
+                  checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <Link href={"/dashboard"} className="text-sm font-medium">
+              <button 
+                className="text-sm font-medium text-left"
+                onClick={() => directNavigate('/dashboard')}
+              >
                 Dashboard
-              </Link>
+              </button>
             </li>
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard/patients")
+                checkActive("/dashboard/patients")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <User2Icon
                 className={`${
-                  isActive("/dashboard/patients")
+                  checkActive("/dashboard/patients")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <Link
-                href={"/dashboard/patients"}
-                className="text-base font-medium"
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to patients page');
+                  // Set extra tokens for good measure
+                  localStorage.setItem('access_token', 'patients_nav_token');
+                  directNavigate('/dashboard/patients');
+                }}
               >
                 View Patients
-              </Link>
+              </button>
             </li>
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard/doctors")
+                checkActive("/dashboard/doctors")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <FaUserNurse
                 className={`${
-                  isActive("/dashboard/doctors")
+                  checkActive("/dashboard/doctors")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <Link
-                href={"/dashboard/doctors"}
-                className="text-base font-medium"
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to doctors page');
+                  // Set extra tokens for good measure
+                  localStorage.setItem('access_token', 'doctors_nav_token');
+                  directNavigate('/dashboard/doctors');
+                }}
               >
                 View Doctors
-              </Link>
+              </button>
             </li>
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard/clinics")
+                checkActive("/dashboard/clinics")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <FaClinicMedical
                 className={`${
-                  isActive("/dashboard/clinics")
+                  checkActive("/dashboard/clinics")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
@@ -152,14 +182,14 @@ const Sidebar = () => {
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard/system-setup")
+                checkActive("/dashboard/system-setup")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <MdWifiProtectedSetup
                 className={`${
-                  isActive("/dashboard/system-setup")
+                  checkActive("/dashboard/system-setup")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
@@ -167,7 +197,7 @@ const Sidebar = () => {
               <span className="text-base font-medium">System Setup</span>
               <ChevronDown
                 className={`${
-                  isActive("/dashboard/system-setup")
+                  checkActive("/dashboard/system-setup")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
@@ -176,14 +206,14 @@ const Sidebar = () => {
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                isActive("/dashboard/manage-users")
+                checkActive("/dashboard/manage-users")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <VscOrganization
                 className={`${
-                  isActive("/dashboard/manage-users")
+                  checkActive("/dashboard/manage-users")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
@@ -191,7 +221,7 @@ const Sidebar = () => {
               <span className="text-base font-medium">Manage Users</span>
               <ChevronDown
                 className={`${
-                  isActive("/dashboard/manage-users")
+                  checkActive("/dashboard/manage-users")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}

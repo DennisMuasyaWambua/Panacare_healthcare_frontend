@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Search, MoreVertical, X } from "lucide-react";
+import { Search, MoreVertical, X, AlertCircle } from "lucide-react";
+import { patientsAPI } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 const ListofPatients = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -9,36 +11,51 @@ const ListofPatients = () => {
   const [patients, setPatients] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [modalPatient, setModalPatient] = useState(null); // State for modal
-
-  // Sample patient data
-  const samplePatients = [
-    {
-      id: 1,
-      name: "John Doe",
-      phone: "123-456-7890",
-      email: "john.doe@example.com",
-      package: "Gold",
-      dateJoined: "2023-01-15",
-      lastActive: "2023-04-01",
-      lastActivity: "Logged in",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      phone: "987-654-3210",
-      email: "jane.smith@example.com",
-      package: "Silver",
-      dateJoined: "2023-02-10",
-      lastActive: "2023-03-28",
-      lastActivity: "Viewed profile",
-      status: "Inactive",
-    },
-  ];
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate fetching data
-    setPatients(samplePatients);
+    const fetchPatients = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await patientsAPI.getAllPatients();
+        setPatients(data);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+        setError("Failed to load patients");
+        toast.error("Failed to load patients list");
+        // Fallback to sample data
+        setPatients([
+          {
+            id: 1,
+            name: "John Doe",
+            phone: "123-456-7890",
+            email: "john.doe@example.com",
+            package: "Gold",
+            dateJoined: "2023-01-15",
+            lastActive: "2023-04-01",
+            lastActivity: "Logged in",
+            status: "Active",
+          },
+          {
+            id: 2,
+            name: "Jane Smith",
+            phone: "987-654-3210",
+            email: "jane.smith@example.com",
+            package: "Silver",
+            dateJoined: "2023-02-10",
+            lastActive: "2023-03-28",
+            lastActivity: "Viewed profile",
+            status: "Inactive",
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatients();
   }, []);
 
   const handleSearch = (e) => {
@@ -149,76 +166,96 @@ const ListofPatients = () => {
           </button>
         </div>
 
-        <table className="min-w-full table-auto">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">
-                <input
-                  type="checkbox"
-                  className="w-[30px] h-[30px] rounded-lg border-gray-300"
-                />
-              </th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Name</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Phone</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Email</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Package</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Date Joined</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Last Active</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Last Activity</th>
-              <th className="px-4 py-2 text-left text-[#29AAE1]">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPatients.map((patient) => (
-              <tr
-                key={patient.id}
-                className={`border-t ${
-                  selectedRows.includes(patient.id) ? "bg-[#29AAE140]" : ""
-                }`}
-              >
-                <td className="px-4 py-2">
+        {isLoading ? (
+          <div className="flex justify-center items-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#29AAE1]"></div>
+            <p className="ml-4 text-gray-500">Loading patients...</p>
+          </div>
+        ) : error ? (
+          <div className="flex justify-center items-center p-8 text-red-500">
+            <AlertCircle className="mr-2" />
+            {error}
+          </div>
+        ) : (
+          <table className="min-w-full table-auto">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">
                   <input
                     type="checkbox"
-                    className={`w-[30px] h-[30px] rounded-lg ${
-                      selectedRows.includes(patient.id)
-                        ? "bg-[#29AAE1] text-white"
-                        : ""
-                    }`}
-                    onChange={() => handleRowSelect(patient.id)}
+                    className="w-[30px] h-[30px] rounded-lg border-gray-300"
                   />
-                </td>
-                <td
-                  className="px-4 py-2 flex items-center gap-2 cursor-pointer"
-                  onClick={() => openModal(patient)}
-                >
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-black">
-                      {patient.name[0]}
-                    </span>
-                  </div>
-                  <span className="text-black">{patient.name}</span>
-                </td>
-                <td className="px-4 py-2 text-black">{patient.phone}</td>
-                <td className="px-4 py-2 text-black">{patient.email}</td>
-                <td className="px-4 py-2 text-black">{patient.package}</td>
-                <td className="px-4 py-2 text-black">{patient.dateJoined}</td>
-                <td className="px-4 py-2 text-black">{patient.lastActive}</td>
-                <td className="px-4 py-2 text-black">{patient.lastActivity}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      patient.status === "Active"
-                        ? "bg-[#27A743] text-white"
-                        : "bg-[#DC3544] text-white"
+                </th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Name</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Phone</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Email</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Package</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Date Joined</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Last Active</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Last Activity</th>
+                <th className="px-4 py-2 text-left text-[#29AAE1]">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPatients.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                    No patients found
+                  </td>
+                </tr>
+              ) : (
+                filteredPatients.map((patient) => (
+                  <tr
+                    key={patient.id}
+                    className={`border-t ${
+                      selectedRows.includes(patient.id) ? "bg-[#29AAE140]" : ""
                     }`}
                   >
-                    {patient.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    <td className="px-4 py-2">
+                      <input
+                        type="checkbox"
+                        className={`w-[30px] h-[30px] rounded-lg ${
+                          selectedRows.includes(patient.id)
+                            ? "bg-[#29AAE1] text-white"
+                            : ""
+                        }`}
+                        onChange={() => handleRowSelect(patient.id)}
+                      />
+                    </td>
+                    <td
+                      className="px-4 py-2 flex items-center gap-2 cursor-pointer"
+                      onClick={() => openModal(patient)}
+                    >
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-black">
+                          {patient.name[0]}
+                        </span>
+                      </div>
+                      <span className="text-black">{patient.name}</span>
+                    </td>
+                    <td className="px-4 py-2 text-black">{patient.phone}</td>
+                    <td className="px-4 py-2 text-black">{patient.email}</td>
+                    <td className="px-4 py-2 text-black">{patient.package}</td>
+                    <td className="px-4 py-2 text-black">{patient.dateJoined}</td>
+                    <td className="px-4 py-2 text-black">{patient.lastActive}</td>
+                    <td className="px-4 py-2 text-black">{patient.lastActivity}</td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          patient.status === "Active"
+                            ? "bg-[#27A743] text-white"
+                            : "bg-[#DC3544] text-white"
+                        }`}
+                      >
+                        {patient.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Modal */}
