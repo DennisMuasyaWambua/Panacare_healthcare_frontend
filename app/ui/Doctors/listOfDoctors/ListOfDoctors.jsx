@@ -71,14 +71,14 @@ const ListOfDoctors = () => {
     );
   };
 
-  const filteredDoctors = doctors.filter((doctor) => {
+  const filteredDoctors = (Array.isArray(doctors) ? doctors : []).filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus =
       statusFilter === "All" || doctor.status === statusFilter;
 
     return matchesSearch && matchesStatus;
-  });
+});
 
   const handleNavigate = () => {
     window.location.href = "/dashboard/doctors/add";
