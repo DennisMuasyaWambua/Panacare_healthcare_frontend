@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
 import { authAPI } from '../../utils/api';
+import { access } from 'fs';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -27,6 +28,8 @@ const Login = () => {
         });
         
         const data = await response.json();
+
+        console.log("API login response:", data);
         
         if (response.ok && data.access_token) {
           // Store the real token
@@ -55,7 +58,7 @@ const Login = () => {
       
       // Fallback for development: use a hardcoded token
       console.warn("Using development fallback login");
-      localStorage.setItem("access_token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRldiBVc2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.L8i6g3PfcHlioHCCPURC9pmXT7gdJpx3kOoyAfNUwCc");
+      localStorage.setItem(access_token);
       toast.success("Login successful (Development Mode)");
       
       setTimeout(() => {
