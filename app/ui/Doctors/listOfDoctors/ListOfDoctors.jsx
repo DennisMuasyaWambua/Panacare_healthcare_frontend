@@ -229,22 +229,22 @@ const ListOfDoctors = () => {
                         setSelectedDoctor(doctor);
                       }}
                     >
-                      {doctor.name}
+                      {doctor.user.last_name}
                     </td>
-                    <td className="px-4 py-2 text-black">{doctor.phone}</td>
-                    <td className="px-4 py-2 text-black">{doctor.email}</td>
+                    <td className="px-4 py-2 text-black">{doctor.user.phone_number}</td>
+                    <td className="px-4 py-2 text-black">{doctor.user.email}</td>
                     <td className="px-4 py-2 text-black">{doctor.specialty}</td>
-                    <td className="px-4 py-2 text-black">{doctor.dateJoined}</td>
+                    <td className="px-4 py-2 text-black">{doctor.created_at}</td>
                     <td className="px-4 py-2 text-black">{doctor.lastActive}</td>
                     <td className="px-4 py-2">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          doctor.status === "Active"
+                          doctor.is_available === "true"
                             ? "bg-[#27A743] text-white"
                             : "bg-[#DC3544] text-white"
                         }`}
                       >
-                        {doctor.status}
+                        {doctor.is_available}
                       </span>
                     </td>
                   </tr>
