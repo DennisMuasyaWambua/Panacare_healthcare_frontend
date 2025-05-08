@@ -20,13 +20,27 @@ const ListOfDoctors = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await doctorsAPI.getAllDoctors();
+        const token = localStorage.getItem("pana_access_token");
+        if (!token) {
+          throw new Error("No access token found");
+        }
+        const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/doctors/admin_list_doctors/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `Error ${response.status}`);
+        }
         setDoctors(data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
         setError("Failed to load doctors");
         toast.error("Failed to load doctors list");
-        // Fallback to sample data in case of error
+        // Fallback sample data if needed.
         setDoctors([
           {
             id: 1,
@@ -72,13 +86,17 @@ const ListOfDoctors = () => {
   };
 
   const filteredDoctors = (Array.isArray(doctors) ? doctors : []).filter((doctor) => {
-    const matchesSearch =
-      doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
+    // Build full name from the nested user object
+    const fullName = `${doctor.user.first_name} ${doctor.user.last_name}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+    
+    // Determine doctor status based on is_verified property
+    const doctorStatus = doctor.is_verified ? "Active" : "Inactive";
     const matchesStatus =
-      statusFilter === "All" || doctor.status === statusFilter;
-
+      statusFilter === "All" || doctorStatus === statusFilter;
+    
     return matchesSearch && matchesStatus;
-});
+  });
 
   const handleNavigate = () => {
     window.location.href = "/dashboard/doctors/add";

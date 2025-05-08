@@ -6,7 +6,7 @@ const API_BASE_URL = "https://panacaredjangobackend-production.up.railway.app";
 // Helper function to get the authorization header
 const getAuthHeader = () => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("pana_access_token");
     
     // Return token in multiple formats to handle different API expectations
     if (token) {
@@ -38,7 +38,7 @@ const refreshAccessToken = async () => {
     if (response.ok) {
       const data = await response.json();
       if (data.access) {
-        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("pana_access_token", data.access);
         return data.access;
       }
     }
@@ -100,7 +100,7 @@ const apiRequest = async (endpoint, options = {}) => {
           // If token refresh fails, use the fallback token
           console.warn("Token refresh failed, using fallback token");
           const fallbackToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRldiBVc2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.L8i6g3PfcHlioHCCPURC9pmXT7gdJpx3kOoyAfNUwCc";
-          localStorage.setItem("access_token", fallbackToken);
+          localStorage.setItem("pana_access_token", fallbackToken);
           
           // Update headers with fallback token
           headers = {
@@ -171,7 +171,7 @@ export const authAPI = {
       // For development/demo purposes only - REMOVE IN PRODUCTION
       if (credentials.email === 'admin@example.com' && credentials.password === 'password') {
         console.warn("Using demo credentials");
-        return { access_token: "demo_token_for_testing" };
+        return { pana_access_token: "demo_token_for_testing" };
       }
       throw error;
     }
@@ -179,20 +179,20 @@ export const authAPI = {
   
   logout: async () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("access_token");
+      localStorage.removeItem("pana_access_token");
     }
   },
   
   checkAuth: () => {
     if (typeof window !== "undefined") {
       // For development/demo purposes - SET A TOKEN IF NOT PRESENT
-      if (process.env.NODE_ENV !== 'production' && !localStorage.getItem("access_token")) {
+      if (process.env.NODE_ENV !== 'production' && !localStorage.getItem("pana_access_token")) {
         // This allows viewing the application without login during development
         // IMPORTANT: REMOVE THIS IN PRODUCTION
-        localStorage.setItem("access_token", "demo_token_for_testing");
+        localStorage.setItem("pana_access_token", "demo_token_for_testing");
       }
       
-      return !!localStorage.getItem("access_token");
+      return !!localStorage.getItem("pana_access_token");
     }
     return false;
   },
@@ -312,31 +312,11 @@ const samplePatients = [
   },
 ];
 
-// Helper function to handle API errors consistently
-const withFallback = async (apiCall, fallbackData, errorMessage = "API error") => {
-  try {
-    // Try the API call with a short timeout
-    const result = await Promise.race([
-      apiCall(),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("API timeout")), 3000)
-      )
-    ]);
-    return result;
-  } catch (error) {
-    console.warn(errorMessage, error);
-    // Always return fallback data instead of failing
-    return fallbackData;
-  }
-};
-
 // Patients API calls
 export const patientsAPI = {
   getAllPatients: async () => {
     return withFallback(
-      // API call
       async () => apiRequest("/api/doctors/admin_list_patients/", { method: "GET" }),
-      // Fallback data
       samplePatients,
       "Using sample patient data due to API error"
     );
@@ -352,7 +332,7 @@ export const patientsAPI = {
   
   addPatient: async (patientData) => {
     return withFallback(
-      async () => apiRequest("/api/healthcare/assign_patient_to_doctor/ ", {
+      async () => apiRequest("/api/healthcare/assign_patient_to_doctor/", {
         method: "POST",
         body: JSON.stringify(patientData),
       }),
@@ -394,6 +374,24 @@ export const patientsAPI = {
       "Mock patient deletion successful as API call failed"
     );
   },
+};
+
+// Helper function to handle API errors consistently
+const withFallback = async (apiCall, fallbackData, errorMessage = "API error") => {
+  try {
+    // Try the API call with a short timeout
+    const result = await Promise.race([
+      apiCall(),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("API timeout")), 3000)
+      )
+    ]);
+    return result;
+  } catch (error) {
+    console.warn(errorMessage, error);
+    // Always return fallback data instead of failing
+    return fallbackData;
+  }
 };
 
 export default {
