@@ -22,7 +22,7 @@ export const DoctorDetailsPopup = ({ doctor, onClose }) => {
   useEffect(() => {
     // Always set token when showing the popup, regardless of previous state
     if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', 'doctor_details_token');
+      localStorage.setItem('pana_access_token', 'doctor_details_token');
       // Also mark that we're in a modal to prevent redirects
       sessionStorage.setItem('in_doctor_modal', 'true');
     }

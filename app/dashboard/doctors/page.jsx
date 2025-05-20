@@ -10,7 +10,7 @@ const ListofDoctorsScreen = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Global token for all pages
-      localStorage.setItem('access_token', 'doctor_list_permanent_token');
+      localStorage.setItem('pana_access_token', 'doctor_list_permanent_token');
       // Mark current page
       sessionStorage.setItem('current_page', 'doctors');
       // Set a specific flag for debugging

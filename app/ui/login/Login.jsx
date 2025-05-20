@@ -43,19 +43,21 @@ const Login = () => {
           }, 1000);
           
           return; // Exit early on success
+        } else {
+          toast.error(data.error || "Login failed. Please try again.");
         }
         
         // Log API response for debugging if not ok
         console.log("API login response:", data);
         
       } catch (apiError) {
-        console.warn("API login failed, using fallback:", apiError);
+        console.log("API login failed, using fallback:", apiError);
       }
       
       // Fallback for development: use a hardcoded token
       console.warn("Using development fallback login");
-      localStorage.setItem("access_token", "development_fallback_token");
-      toast.success("Login successful (Development Mode)");
+      localStorage.setItem("pana_access_token", "development_fallback_token");
+      // toast.success("Login successful (Development Mode)");
       
       setTimeout(() => {
         // window.location.href = "/dashboard";

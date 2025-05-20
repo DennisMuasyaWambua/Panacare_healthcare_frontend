@@ -19,8 +19,8 @@ export function useAuth() {
         setIsLoading(false);
         
         // Always ensure there's a token, but don't redirect
-        if (typeof window !== "undefined" && !localStorage.getItem("access_token")) {
-          localStorage.setItem("access_token", "global_dev_token");
+        if (typeof window !== "undefined" && !localStorage.getItem("pana_access_token")) {
+          localStorage.setItem("pana_access_token", "global_dev_token");
         }
         
         // Uncomment for production use

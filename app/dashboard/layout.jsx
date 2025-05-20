@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
   // Set token on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', 'dashboard_permanent_token');
+      localStorage.setItem('pana_access_token', 'dashboard_permanent_token');
     }
   }, []);
   

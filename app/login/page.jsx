@@ -9,7 +9,7 @@ const LoginPageScreen = () => {
   // If user already has a token, redirect to dashboard
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const hasToken = localStorage.getItem('access_token');
+      const hasToken = localStorage.getItem('pana_access_token');
       
       // Check if we're coming from dashboard to login
       const fromDashboard = sessionStorage.getItem('from_dashboard');
@@ -22,7 +22,7 @@ const LoginPageScreen = () => {
       }
       
       // Set a permanent access token
-      localStorage.setItem('access_token', 'login_page_token');
+      localStorage.setItem('pana_access_token', 'login_page_token');
     }
   }, [router]);
   

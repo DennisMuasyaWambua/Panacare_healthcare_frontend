@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
     // Always set a token in development mode
     if (typeof window !== 'undefined') {
       // Set a default token to ensure authentication
-      localStorage.setItem('access_token', 'default_auth_token');
+      localStorage.setItem('pana_access_token', 'default_auth_token');
       setAuthenticated(true);
       setIsReady(true);
     }

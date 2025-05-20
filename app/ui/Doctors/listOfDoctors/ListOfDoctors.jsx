@@ -222,7 +222,7 @@ const ListOfDoctors = () => {
                       onClick={() => {
                         // Always set token before showing popup
                         if (typeof window !== 'undefined') {
-                          localStorage.setItem('access_token', 'doctor_view_token');
+                          localStorage.setItem('pana_access_token', 'doctor_view_token');
                           // Mark that we're viewing a doctor
                           sessionStorage.setItem('viewing_doctor', 'true');
                         }

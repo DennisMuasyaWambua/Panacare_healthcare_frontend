@@ -18,7 +18,7 @@ const Sidebar = () => {
   // Set auth token on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', 'sidebar_token_' + Date.now());
+      localStorage.setItem('pana_access_token', 'sidebar_token_' + Date.now());
       console.log('Sidebar mounted, token set');
     }
   }, []);
@@ -128,7 +128,7 @@ const Sidebar = () => {
                 onClick={() => {
                   console.log('Navigating to patients page');
                   // Set extra tokens for good measure
-                  localStorage.setItem('access_token', 'patients_nav_token');
+                  localStorage.setItem('pana_access_token', 'patients_nav_token');
                   directNavigate('/dashboard/patients');
                 }}
               >
@@ -155,7 +155,7 @@ const Sidebar = () => {
                 onClick={() => {
                   console.log('Navigating to doctors page');
                   // Set extra tokens for good measure
-                  localStorage.setItem('access_token', 'doctors_nav_token');
+                  localStorage.setItem('pana_access_token', 'doctors_nav_token');
                   directNavigate('/dashboard/doctors');
                 }}
               >
