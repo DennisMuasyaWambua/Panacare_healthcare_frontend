@@ -13,6 +13,8 @@ const LoginPageScreen = () => {
       
       // Check if we're coming from dashboard to login
       const fromDashboard = sessionStorage.getItem('from_dashboard');
+
+      console.log(hasToken, "fromDashboard");
       
       if (hasToken && !fromDashboard) {
         // User already logged in, redirect to dashboard
