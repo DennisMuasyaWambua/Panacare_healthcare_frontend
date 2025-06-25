@@ -27,13 +27,13 @@ const Login = () => {
         const data = await response.json();
         console.log("API login response:", data);
         
-        if (response.ok && data.tokens && data.tokens.access) {
+        if (response.ok && data.access) {
           // Store the real token
-          localStorage.setItem("pana_access_token", data.tokens.access);
+          localStorage.setItem("pana_access_token", data.access);
           console.log("this is the login data \n"+data)
           
           // Optionally store the refresh token if present
-          if (data.tokens.refresh) {
+          if (data.refresh) {
             localStorage.setItem("refresh_token", data.tokens.refresh);
           }
           
