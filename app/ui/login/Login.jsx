@@ -30,6 +30,7 @@ const Login = () => {
         if (response.ok && data.tokens && data.tokens.access) {
           // Store the real token
           localStorage.setItem("pana_access_token", data.tokens.access);
+          console.log("this is the login data \n"+data)
           
           // Optionally store the refresh token if present
           if (data.tokens.refresh) {
