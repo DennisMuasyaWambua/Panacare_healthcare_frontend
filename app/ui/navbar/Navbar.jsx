@@ -1,18 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { User, LogOut } from "lucide-react";
-import { authAPI } from "../../utils/api";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = () => {
-  const [username, setUsername] = useState("Admin");
-  const router = useRouter();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    authAPI.logout();
-    toast.success("Logged out successfully");
-    router.push("/login");
+    logout();
   };
 
   return (
@@ -24,7 +19,9 @@ const Navbar = () => {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <User className="w-6 h-6 text-black" />
-          <span className="text-blue-500 font-medium">{username}</span>
+          <span className="text-blue-500 font-medium">
+            {user ? `${user.first_name} ${user.last_name}` : 'User'}
+          </span>
         </div>
         <button 
           onClick={handleLogout}

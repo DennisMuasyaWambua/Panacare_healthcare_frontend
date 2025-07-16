@@ -20,49 +20,12 @@ const ListOfDoctors = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const token = localStorage.getItem("pana_access_token");
-        if (!token) {
-          throw new Error("No access token found");
-        }
-        const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/doctors/admin_list_doctors/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.error || `Error ${response.status}`);
-        }
+        const data = await doctorsAPI.getAllDoctors();
         setDoctors(data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
         setError("Failed to load doctors");
         toast.error("Failed to load doctors list");
-        // Fallback sample data if needed.
-        setDoctors([
-          {
-            id: 1,
-            name: "Dr. John Doe",
-            phone: "123-456-7890",
-            email: "john.doe@example.com",
-            specialty: "Cardiology",
-            dateJoined: "2023-01-15",
-            lastActive: "2023-04-01",
-            status: "Active",
-          },
-          {
-            id: 2,
-            name: "Dr. Jane Smith",
-            phone: "987-654-3210",
-            email: "jane.smith@example.com",
-            specialty: "Pediatrics",
-            dateJoined: "2023-02-10",
-            lastActive: "2023-03-28",
-            status: "Inactive",
-          },
-        ]);
       } finally {
         setIsLoading(false);
       }

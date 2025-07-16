@@ -6,21 +6,18 @@ const API_BASE_URL = "https://panacaredjangobackend-production.up.railway.app";
 // Helper function to get the authorization header
 const getAuthHeader = () => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("pana_access_token");
+    const token = localStorage.getItem("access_token");
     
-    // Return token in multiple formats to handle different API expectations
     if (token) {
-      // Log the token being used (for debugging)
       console.debug("Using token for auth:", token.substring(0, 10) + "...");
       
       return { 
         "Authorization": `Bearer ${token}`,
-        "X-Authorization": `Bearer ${token}`,
-        "x-access-token": token
+        "Content-Type": "application/json"
       };
     }
   }
-  return {};
+  return { "Content-Type": "application/json" };
 };
 
 // Function to refresh the token
@@ -29,7 +26,7 @@ const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("refresh_token");
     if (!refreshToken) return null;
     
-    const response = await fetch(`${API_BASE_URL}/api/users/refresh/`, {
+    const response = await fetch(`${API_BASE_URL}/api/token/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh: refreshToken }),
@@ -38,7 +35,7 @@ const refreshAccessToken = async () => {
     if (response.ok) {
       const data = await response.json();
       if (data.access) {
-        localStorage.setItem("pana_access_token", data.access);
+        localStorage.setItem("access_token", data.access);
         return data.access;
       }
     }
@@ -78,16 +75,14 @@ const apiRequest = async (endpoint, options = {}) => {
       
       // If unauthorized, try to refresh the token
       if (response.status === 401) {
-        console.warn("Trying to refresh token...");
+        console.warn("Unauthorized - trying to refresh token...");
         const newToken = await refreshAccessToken();
         
         if (newToken) {
           // Update headers with new token
           headers = {
             ...headers,
-            "Authorization": `Bearer ${newToken}`,
-            "X-Authorization": `Bearer ${newToken}`,
-            "x-access-token": newToken
+            "Authorization": `Bearer ${newToken}`
           };
           
           // Retry the request with new token
@@ -97,25 +92,13 @@ const apiRequest = async (endpoint, options = {}) => {
             signal: controller.signal
           });
         } else {
-          // If token refresh fails, use the fallback token
-          console.warn("Token refresh failed, using fallback token");
-          const fallbackToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkRldiBVc2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.L8i6g3PfcHlioHCCPURC9pmXT7gdJpx3kOoyAfNUwCc";
-          localStorage.setItem("pana_access_token", fallbackToken);
-          
-          // Update headers with fallback token
-          headers = {
-            ...headers,
-            "Authorization": `Bearer ${fallbackToken}`,
-            "X-Authorization": `Bearer ${fallbackToken}`,
-            "x-access-token": fallbackToken
-          };
-          
-          // Retry the request with fallback token
-          response = await fetch(url, {
-            ...options,
-            headers,
-            signal: controller.signal
-          });
+          // If token refresh fails, redirect to login
+          console.warn("Token refresh failed, redirecting to login");
+          localStorage.clear();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          throw new Error('Authentication failed');
         }
       }
       

@@ -4,68 +4,45 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-toastify';
-import { authAPI } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Try the actual API login first
-      try {
-        const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
+      const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      console.log("API login response:", data);
+      
+      if (response.ok && data.access) {
+        const loginSuccess = login(data);
         
-        const data = await response.json();
-        console.log("API login response:", data);
-        
-        if (response.ok && data.access) {
-          // Store the real token
-          localStorage.setItem("pana_access_token", data.access);
-          console.log("this is the login data \n"+data)
-          
-          // Optionally store the refresh token if present
-          if (data.refresh) {
-            localStorage.setItem("refresh_token", data.tokens.refresh);
-          }
-          
+        if (loginSuccess) {
           toast.success("Login successful!");
-          
-          setTimeout(() => {
-            window.location.href = "/dashboard";
-          }, 1000);
-          
-          return; // Exit early on success
+          router.push('/dashboard');
         } else {
-          toast.error(data.error || "Login failed. Please try again.");
+          toast.error("Failed to process login data");
         }
-        
-        // Log API response for debugging if not ok
-        console.log("API login response:", data);
-        
-      } catch (apiError) {
-        console.log("API login failed, using fallback:", apiError);
+      } else {
+        toast.error(data.message || data.error || "Invalid credentials");
       }
-      
-      // Fallback for development: use a hardcoded token
-      console.warn("Using development fallback login");
-      localStorage.setItem("pana_access_token", "development_fallback_token");
-      // toast.success("Login successful (Development Mode)");
-      
-      setTimeout(() => {
-        // window.location.href = "/dashboard";
-      }, 1000);
     } catch (error) {
-      console.error("Error during login:", error.message);
-      toast.error(error.message || "Login failed. Please try again.");
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
