@@ -1,49 +1,50 @@
-"use client"
-import React, { useState } from 'react'
-import Image from 'next/image';
-import { toast } from 'react-toastify';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { toast } from "react-toastify";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+export default function RegisterPage() {
   const router = useRouter();
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+    address: ""
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    
+    setLoading(true);
     try {
-      const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
+      const res = await fetch("/api/users/register-admin/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          admin_token: "panacare_secure_admin_token_2025",
+          ...form
+        })
       });
-      
-      const data = await response.json();
-      console.log("API login response:", data);
-      
-      if (response.ok && data.access) {
-        const loginSuccess = login(data);
-        
-        if (loginSuccess) {
-          toast.success("Login successful!");
-          // Use replace to avoid history stack issues
-          router.replace('/dashboard');
-        } else {
-          toast.error("Failed to process login data");
-        }
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Registration successful! Please login.");
+        router.push("/login");
       } else {
-        toast.error(data.message || data.error || "Invalid credentials");
+        toast.error(data.detail || "Registration failed");
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+    } catch (err) {
+      console.error("Registration error:", err);
+      toast.error("Network error. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -126,7 +127,7 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
+      {/* Right Side - Register Form */}
       <div className="bg-white w-full md:w-3/5 flex flex-col items-center justify-center p-8">
         <div className="max-w-md w-full">
           <div className="flex justify-center mb-8">
@@ -134,58 +135,124 @@ const Login = () => {
           </div>
           
           <h2 className="text-xl font-semibold mb-8 text-center text-grey-800">
-            Welcome, Please sign in to begin your task.
+            Register for a new admin account
           </h2>
           
           <form onSubmit={handleSubmit} className="w-full">
-            <div className="mb-6">
+            <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
-                Enter your email
+                Email
               </label>
               <input
                 type="email"
                 id="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
             
-            <div className="mb-6">
+            <div className="mb-4">
               <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
                 Password
               </label>
               <input
                 type="password"
                 id="password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                placeholder="Create a password"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label htmlFor="first_name" className="block text-sm font-medium text-black mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  placeholder="First name"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-black mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  placeholder="Last name"
+                />
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label htmlFor="phone_number" className="block text-sm font-medium text-black mb-1">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                id="phone_number"
+                name="phone_number"
+                value={form.phone_number}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                placeholder="Enter phone number"
+              />
+            </div>
+            
+            <div className="mb-6">
+              <label htmlFor="address" className="block text-sm font-medium text-black mb-1">
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                placeholder="Enter address"
               />
             </div>
             
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full bg-[#29AAE1] text-white py-3 rounded-full hover:bg-blue-600 transition duration-200 disabled:opacity-70"
             >
-              {isLoading ? "Logging in..." : "Log In"}
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
           
           <div className="text-center mt-6">
-            <a href="/trouble-login" className="text-blue-500 text-sm hover:underline">
-              Trouble logging in?
-            </a>
+            <Link href="/login" className="text-blue-500 text-sm hover:underline">
+              Already have an account? Login
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default Login

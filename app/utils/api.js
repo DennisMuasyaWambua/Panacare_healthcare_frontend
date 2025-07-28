@@ -94,11 +94,17 @@ const apiRequest = async (endpoint, options = {}) => {
         } else {
           // If token refresh fails, redirect to login
           console.warn("Token refresh failed, redirecting to login");
-          localStorage.clear();
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-          throw new Error('Authentication failed');
+          
+          // Clear auth data
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('user_data');
+          localStorage.removeItem('user_roles');
+          localStorage.removeItem('role_data');
+          
+          // Don't use direct window.location to avoid race conditions
+          // Let the ProtectedRoute handle redirect on next render
+          throw new Error('Authentication failed - token refresh error');
         }
       }
       

@@ -2,12 +2,21 @@
 import React from "react";
 import { User, LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
+    // First clear all auth data
     logout();
+    
+    // Use setTimeout to ensure state updates are processed before navigation
+    setTimeout(() => {
+      // Use replace instead of push to avoid back button issues
+      router.replace('/login');
+    }, 50);
   };
 
   return (

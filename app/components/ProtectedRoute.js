@@ -2,26 +2,35 @@
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import PropTypes from 'prop-types';
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
-  const { user, loading, hasRole } = useAuth();
+  const { user, loading, isInitialized, hasRole } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+    // Only redirect if the authentication state is fully initialized and not loading
+    if (isInitialized && !loading && !user) {
+      // This timeout prevents the racing condition between dashboard render and login redirect
+      const redirectTimeout = setTimeout(() => {
+        router.replace('/login');
+      }, 0);
       
-      if (requiredRole && !hasRole(requiredRole)) {
-        console.warn(`Access denied. Required role: ${requiredRole}`);
-        // Don't redirect for role issues, just show access denied
-      }
+      // Cleanup timeout if component unmounts
+      return () => clearTimeout(redirectTimeout);
     }
-  }, [user, loading, requiredRole, router, hasRole]);
+  }, [user, loading, isInitialized, router]);
 
-  if (loading) {
+  // Only check for required roles if we have a user
+  useEffect(() => {
+    if (isInitialized && !loading && user && requiredRole && !hasRole(requiredRole)) {
+      console.warn(`Access denied. Required role: ${requiredRole}`);
+      // Don't redirect for role issues, just show access denied
+    }
+  }, [user, loading, isInitialized, requiredRole, hasRole]);
+
+  // Show loading state while authentication is being checked
+  if (loading || !isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#29AAE1]"></div>
@@ -30,6 +39,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     );
   }
 
+  // If not authenticated, render nothing (redirect happens in useEffect)
   if (!user) {
     return null;
   }
@@ -47,6 +57,11 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
   }
 
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requiredRole: PropTypes.string
 };
 
 export default ProtectedRoute;

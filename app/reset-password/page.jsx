@@ -1,49 +1,29 @@
-"use client"
-import React, { useState } from 'react'
-import Image from 'next/image';
-import { toast } from 'react-toastify';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { toast } from "react-toastify";
 
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+export default function ResetPasswordPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    
+    setLoading(true);
     try {
-      const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await response.json();
-      console.log("API login response:", data);
-      
-      if (response.ok && data.access) {
-        const loginSuccess = login(data);
-        
-        if (loginSuccess) {
-          toast.success("Login successful!");
-          // Use replace to avoid history stack issues
-          router.replace('/dashboard');
-        } else {
-          toast.error("Failed to process login data");
-        }
-      } else {
-        toast.error(data.message || data.error || "Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+      // This is a placeholder for the actual API call
+      // In a real implementation, this would call your password reset API endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success("Password reset instructions sent to your email!");
+      router.push("/login");
+    } catch (err) {
+      console.error("Password reset error:", err);
+      toast.error("Error sending reset instructions. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -126,66 +106,53 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
+      {/* Right Side - Reset Password Form */}
       <div className="bg-white w-full md:w-3/5 flex flex-col items-center justify-center p-8">
         <div className="max-w-md w-full">
           <div className="flex justify-center mb-8">
             <Image src="/logo.jpg" alt="panacarelogo.png" width={300} height={300}/>
           </div>
           
-          <h2 className="text-xl font-semibold mb-8 text-center text-grey-800">
-            Welcome, Please sign in to begin your task.
+          <h2 className="text-xl font-semibold mb-4 text-center text-grey-800">
+            Reset Your Password
           </h2>
+          
+          <p className="mb-8 text-center text-gray-600">
+            Enter your email address below and we'll send you instructions to reset your password.
+          </p>
           
           <form onSubmit={handleSubmit} className="w-full">
             <div className="mb-6">
               <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
-                Enter your email
+                Email Address
               </label>
               <input
                 type="email"
                 id="email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-              />
-            </div>
-            
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                placeholder="Enter your email"
               />
             </div>
             
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full bg-[#29AAE1] text-white py-3 rounded-full hover:bg-blue-600 transition duration-200 disabled:opacity-70"
             >
-              {isLoading ? "Logging in..." : "Log In"}
+              {loading ? "Sending Instructions..." : "Reset Password"}
             </button>
           </form>
           
           <div className="text-center mt-6">
-            <a href="/trouble-login" className="text-blue-500 text-sm hover:underline">
-              Trouble logging in?
-            </a>
+            <Link href="/login" className="text-blue-500 text-sm hover:underline">
+              Back to Login
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default Login
