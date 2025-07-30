@@ -7,8 +7,7 @@
 export const directNavigate = (path, options = {}) => {
   if (typeof window === 'undefined') return;
 
-  // Always set authentication token before navigation
-  localStorage.setItem('access_token', 'navigation_token_' + Date.now());
+  // Store navigation info without modifying authentication tokens
   localStorage.setItem('last_page', window.location.pathname);
   localStorage.setItem('next_page', path);
   

@@ -17,6 +17,10 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      // First, clean up any existing tokens to ensure a fresh login
+      const authUtils = await import('../../utils/authUtils').then(module => module.default);
+      authUtils.cleanupConflictingTokens();
+      
       const response = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,12 +31,16 @@ const Login = () => {
       console.log("API login response:", data);
       
       if (response.ok && data.access) {
+        // Process login through AuthContext
         const loginSuccess = login(data);
         
         if (loginSuccess) {
           toast.success("Login successful!");
-          // Use replace to avoid history stack issues
-          router.replace('/dashboard');
+          
+          // Use direct window location for a clean navigation without history
+          if (typeof window !== 'undefined') {
+            window.location.href = '/dashboard';
+          }
         } else {
           toast.error("Failed to process login data");
         }

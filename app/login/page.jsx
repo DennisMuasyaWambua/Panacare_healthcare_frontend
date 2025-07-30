@@ -1,30 +1,27 @@
 "use client";
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import Login from "../ui/login/Login";
+import authUtils from "../utils/authUtils";
 
 const LoginPageScreen = () => {
-  const router = useRouter();
+  const [redirected, setRedirected] = useState(false);
   
-  // If user already has a token, redirect to dashboard
+  // If user already authenticated, redirect to dashboard
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hasToken = localStorage.getItem('pana_access_token');
+    if (typeof window !== 'undefined' && !redirected) {
+      // Always clean up any conflicting tokens
+      authUtils.cleanupConflictingTokens();
       
-      // Check if we're coming from dashboard to login
-      const fromDashboard = sessionStorage.getItem('from_dashboard');
-
-      console.log(hasToken, "fromDashboard");
+      // Check if authenticated using our utility
+      const isAuthenticated = authUtils.isAuthenticated();
       
-      if (hasToken && !fromDashboard) {
+      if (isAuthenticated) {
         // User already logged in, redirect to dashboard
-        router.push('/dashboard');
+        setRedirected(true);
+        window.location.href = '/dashboard';
       }
-      
-      // Set a permanent access token
-      localStorage.setItem('pana_access_token', 'login_page_token');
     }
-  }, [router]);
+  }, [redirected]);
   
   return <Login />;
 };

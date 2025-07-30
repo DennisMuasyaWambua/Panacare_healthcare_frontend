@@ -1,21 +1,25 @@
 "use client";
 
+import authUtils from './authUtils';
+
 // API base URL
 const API_BASE_URL = "https://panacaredjangobackend-production.up.railway.app";
 
 // Helper function to get the authorization header
 const getAuthHeader = () => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("access_token");
+    // Use authUtils to get auth headers with our consistent token naming
+    const headers = authUtils.getAuthHeaders();
     
-    if (token) {
+    if (headers.Authorization) {
+      const token = headers.Authorization.split(' ')[1];
       console.debug("Using token for auth:", token.substring(0, 10) + "...");
-      
-      return { 
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      };
     }
+    
+    return {
+      ...headers,
+      "Content-Type": "application/json"
+    };
   }
   return { "Content-Type": "application/json" };
 };
@@ -23,7 +27,7 @@ const getAuthHeader = () => {
 // Function to refresh the token
 const refreshAccessToken = async () => {
   try {
-    const refreshToken = localStorage.getItem("refresh_token");
+    const refreshToken = authUtils.getRefreshToken();
     if (!refreshToken) return null;
     
     const response = await fetch(`${API_BASE_URL}/api/token/refresh/`, {
@@ -35,7 +39,7 @@ const refreshAccessToken = async () => {
     if (response.ok) {
       const data = await response.json();
       if (data.access) {
-        localStorage.setItem("access_token", data.access);
+        authUtils.updateAuthToken(data.access);
         return data.access;
       }
     }
@@ -92,18 +96,13 @@ const apiRequest = async (endpoint, options = {}) => {
             signal: controller.signal
           });
         } else {
-          // If token refresh fails, redirect to login
-          console.warn("Token refresh failed, redirecting to login");
+          // If token refresh fails, initiate a controlled logout
+          console.warn("Token refresh failed, marking for logout");
           
-          // Clear auth data
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('user_data');
-          localStorage.removeItem('user_roles');
-          localStorage.removeItem('role_data');
+          // Start the logout process
+          authUtils.startLogout();
           
-          // Don't use direct window.location to avoid race conditions
-          // Let the ProtectedRoute handle redirect on next render
+          // Let the AuthContext handle the redirect in a controlled manner
           throw new Error('Authentication failed - token refresh error');
         }
       }
@@ -153,215 +152,251 @@ export const authAPI = {
         method: "POST",
         body: JSON.stringify(credentials),
       });
+      
+      // Store authentication data using authUtils
+      if (result && result.access) {
+        authUtils.storeAuthData(result);
+      }
+      
       return result;
     } catch (error) {
       console.error("Login error:", error);
-      
-      // For development/demo purposes only - REMOVE IN PRODUCTION
-      if (credentials.email === 'admin@example.com' && credentials.password === 'password') {
-        console.warn("Using demo credentials");
-        return { pana_access_token: "demo_token_for_testing" };
-      }
       throw error;
     }
   },
   
   logout: async () => {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("pana_access_token");
+      // Start logout process
+      authUtils.startLogout();
+      
+      try {
+        // Cleanup all tokens (both old and new)
+        authUtils.cleanupConflictingTokens();
+        
+        // Complete the logout process
+        authUtils.completeLogout();
+        
+        // Force a clean navigation to login
+        window.location.href = '/login';
+      } catch (error) {
+        console.warn("Logout process failed:", error);
+        // Force navigation anyway
+        window.location.href = '/login';
+      }
     }
   },
   
   checkAuth: () => {
     if (typeof window !== "undefined") {
-      // For development/demo purposes - SET A TOKEN IF NOT PRESENT
-      if (process.env.NODE_ENV !== 'production' && !localStorage.getItem("pana_access_token")) {
-        // This allows viewing the application without login during development
-        // IMPORTANT: REMOVE THIS IN PRODUCTION
-        localStorage.setItem("pana_access_token", "demo_token_for_testing");
-      }
-      
-      return !!localStorage.getItem("pana_access_token");
+      return authUtils.isAuthenticated();
     }
     return false;
   },
 };
 
-// Sample doctor data for testing
-const sampleDoctors = [
-  {
-    id: 1,
-    name: "Dr. John Doe",
-    phone: "123-456-7890",
-    email: "john.doe@example.com",
-    specialty: "Cardiology",
-    dateJoined: "2023-01-15",
-    lastActive: "2023-04-01",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Dr. Jane Smith",
-    phone: "987-654-3210",
-    email: "jane.smith@example.com",
-    specialty: "Pediatrics",
-    dateJoined: "2023-02-10",
-    lastActive: "2023-03-28",
-    status: "Inactive",
-  },
-];
+// API will provide real doctor data
+const sampleDoctors = [];
 
 // Doctors API calls
 export const doctorsAPI = {
-  getAllDoctors: async () => {
-    return withFallback(
-      async () => apiRequest("/api/doctors/admin_list_doctors/", { method: "GET" }),
-      sampleDoctors,
-      "Using sample doctor data due to API error"
-    );
+  getAllDoctors: async (isVerified) => {
+    const url = isVerified !== undefined 
+      ? `/api/doctors/admin_list_doctors/?is_verified=${isVerified}` 
+      : "/api/doctors/admin_list_doctors/";
+    return await apiRequest(url, { method: "GET" });
   },
   
   getDoctorById: async (id) => {
-    return withFallback(
-      async () => apiRequest(`/api/doctors/admin_view_doctor/${id}/`, { method: "GET" }),
-      sampleDoctors.find(doctor => doctor.id === id) || sampleDoctors[0],
-      "Using sample doctor data for individual view due to API error"
-    );
+    return await apiRequest(`/api/doctors/admin_view_doctor/${id}/`, { method: "GET" });
   },
   
   addDoctor: async (doctorData) => {
-    return withFallback(
-      async () => apiRequest("/api/doctors/admin_add_doctor/", {
-        method: "POST",
-        body: JSON.stringify(doctorData),
-      }),
-      { 
-        ...doctorData, 
-        id: Math.floor(Math.random() * 1000), 
-        success: true,
-        message: "Doctor created successfully (Test Mode)" 
-      },
-      "Mock doctor creation successful as API call failed"
-    );
+    return await apiRequest("/api/doctors/admin_add_doctor/", {
+      method: "POST",
+      body: JSON.stringify(doctorData),
+    });
   },
   
   updateDoctor: async (id, doctorData) => {
-    return withFallback(
-      async () => apiRequest(`/api/doctors/admin_update_doctor/${id}/`, {
-        method: "PUT",
-        body: JSON.stringify(doctorData),
-      }),
-      { 
-        ...doctorData, 
-        id, 
-        success: true,
-        message: "Doctor updated successfully (Test Mode)" 
-      },
-      "Mock doctor update successful as API call failed"
-    );
+    return await apiRequest(`/api/doctors/admin_update_doctor/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(doctorData),
+    });
   },
   
   deleteDoctor: async (id) => {
-    return withFallback(
-      async () => apiRequest(`/api/doctors/admin_delete_doctor/${id}/`, {
-        method: "DELETE",
-      }),
-      { 
-        success: true,
-        message: "Doctor deleted successfully (Test Mode)" 
-      },
-      "Mock doctor deletion successful as API call failed"
-    );
+    return await apiRequest(`/api/doctors/admin_delete_doctor/${id}/`, {
+      method: "DELETE",
+    });
+  },
+  
+  verifyDoctor: async (id) => {
+    return await apiRequest(`/api/doctors/${id}/verify_doctor/`, {
+      method: "PATCH"
+    });
+  },
+  
+  exportDoctorsToCsv: async () => {
+    return await apiRequest("/api/doctors/export/", { 
+      method: "GET",
+      responseType: 'blob' 
+    });
   },
 };
 
-// Sample patient data for testing
-const samplePatients = [
-  {
-    id: 1,
-    name: "John Doe",
-    phone: "123-456-7890",
-    email: "john.doe@example.com",
-    package: "Gold",
-    dateJoined: "2023-01-15",
-    lastActive: "2023-04-01",
-    lastActivity: "Logged in",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    phone: "987-654-3210",
-    email: "jane.smith@example.com",
-    package: "Silver",
-    dateJoined: "2023-02-10",
-    lastActive: "2023-03-28",
-    lastActivity: "Viewed profile",
-    status: "Inactive",
-  },
-];
+// API will provide real patient data
+const samplePatients = [];
 
 // Patients API calls
 export const patientsAPI = {
   getAllPatients: async () => {
-    return withFallback(
-      async () => apiRequest("/api/doctors/admin_list_patients/", { method: "GET" }),
-      samplePatients,
-      "Using sample patient data due to API error"
-    );
+    return await apiRequest("/api/patients/", { method: "GET" });
   },
   
   getPatientById: async (id) => {
-    return withFallback(
-      async () => apiRequest(`/api/doctors/admin_view_patient/${id}/`, { method: "GET" }),
-      samplePatients.find(patient => patient.id === id) || samplePatients[0],
-      "Using sample patient data for individual view due to API error"
-    );
+    return await apiRequest(`/api/patients/${id}/`, { method: "GET" });
   },
   
   addPatient: async (patientData) => {
-    return withFallback(
-      async () => apiRequest("/api/healthcare/assign_patient_to_doctor/", {
-        method: "POST",
-        body: JSON.stringify(patientData),
-      }),
-      { 
-        ...patientData, 
-        id: Math.floor(Math.random() * 1000), 
-        success: true,
-        message: "Patient created successfully (Test Mode)" 
-      },
-      "Mock patient creation successful as API call failed"
-    );
+    return await apiRequest("/api/patients/", {
+      method: "POST",
+      body: JSON.stringify(patientData),
+    });
   },
   
   updatePatient: async (id, patientData) => {
-    return withFallback(
-      async () => apiRequest(`/api/patients/${id}/`, {
-        method: "PUT",
-        body: JSON.stringify(patientData),
-      }),
-      { 
-        ...patientData, 
-        id, 
-        success: true,
-        message: "Patient updated successfully (Test Mode)" 
-      },
-      "Mock patient update successful as API call failed"
-    );
+    return await apiRequest(`/api/patients/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(patientData),
+    });
   },
   
   deletePatient: async (id) => {
-    return withFallback(
-      async () => apiRequest(`/api/patients/${id}/`, {
-        method: "DELETE",
-      }),
-      { 
-        success: true,
-        message: "Patient deleted successfully (Test Mode)" 
-      },
-      "Mock patient deletion successful as API call failed"
-    );
+    return await apiRequest(`/api/patients/${id}/`, {
+      method: "DELETE",
+    });
+  },
+  
+  exportPatientsToCsv: async () => {
+    return await apiRequest("/api/patients/export/", { 
+      method: "GET",
+      responseType: 'blob' 
+    });
+  },
+};
+
+// Healthcare Facilities API calls
+export const healthcareFacilitiesAPI = {
+  getAllFacilities: async () => {
+    return await apiRequest("/api/healthcare/", { method: "GET" });
+  },
+  
+  getFacilityById: async (id) => {
+    return await apiRequest(`/api/healthcare/${id}/`, { method: "GET" });
+  },
+  
+  addFacility: async (facilityData) => {
+    return await apiRequest("/api/healthcare/", {
+      method: "POST",
+      body: JSON.stringify(facilityData),
+    });
+  },
+  
+  updateFacility: async (id, facilityData) => {
+    return await apiRequest(`/api/healthcare/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(facilityData),
+    });
+  },
+  
+  deleteFacility: async (id) => {
+    return await apiRequest(`/api/healthcare/${id}/`, {
+      method: "DELETE",
+    });
+  },
+  
+  exportFacilitiesToCsv: async () => {
+    return await apiRequest("/api/healthcare/export/", { 
+      method: "GET", 
+      responseType: 'blob' 
+    });
+  },
+};
+
+// Patient-Doctor Assignment API calls
+export const assignmentAPI = {
+  getAllAssignments: async () => {
+    return await apiRequest("/api/healthcare/list_patient_doctor_assignments/", { method: "GET" });
+  },
+  
+  getAssignmentById: async (id) => {
+    return await apiRequest(`/api/healthcare/view_assignment/${id}/`, { method: "GET" });
+  },
+  
+  assignPatientToDoctor: async (assignmentData) => {
+    return await apiRequest("/api/healthcare/assign_patient_to_doctor/", {
+      method: "POST",
+      body: JSON.stringify(assignmentData),
+    });
+  },
+  
+  updateAssignment: async (id, assignmentData) => {
+    return await apiRequest(`/api/healthcare/update_assignment/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(assignmentData),
+    });
+  },
+  
+  deleteAssignment: async (id) => {
+    return await apiRequest(`/api/healthcare/delete_assignment/${id}/`, {
+      method: "DELETE",
+    });
+  },
+};
+
+// Appointments API calls
+export const appointmentsAPI = {
+  getAllAppointments: async () => {
+    return await apiRequest("/api/appointments/", { method: "GET" });
+  },
+  
+  getAppointmentById: async (id) => {
+    return await apiRequest(`/api/appointments/${id}/`, { method: "GET" });
+  },
+  
+  createAppointment: async (appointmentData) => {
+    return await apiRequest("/api/appointments/", {
+      method: "POST",
+      body: JSON.stringify(appointmentData),
+    });
+  },
+  
+  updateAppointment: async (id, appointmentData) => {
+    return await apiRequest(`/api/appointments/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(appointmentData),
+    });
+  },
+  
+  cancelAppointment: async (id) => {
+    return await apiRequest(`/api/appointments/${id}/cancel_appointment/`, {
+      method: "POST"
+    });
+  },
+  
+  rescheduleAppointment: async (id, rescheduleData) => {
+    return await apiRequest(`/api/appointments/${id}/patient_reschedule/`, {
+      method: "POST",
+      body: JSON.stringify(rescheduleData),
+    });
+  },
+  
+  exportAppointmentsToCsv: async () => {
+    return await apiRequest("/api/appointments/export/", { 
+      method: "GET", 
+      responseType: 'blob' 
+    });
   },
 };
 
@@ -378,8 +413,8 @@ const withFallback = async (apiCall, fallbackData, errorMessage = "API error") =
     return result;
   } catch (error) {
     console.warn(errorMessage, error);
-    // Always return fallback data instead of failing
-    return fallbackData;
+    // Return an empty array or object instead of mock data
+    return Array.isArray(fallbackData) ? [] : {};
   }
 };
 
@@ -387,4 +422,7 @@ export default {
   authAPI,
   doctorsAPI,
   patientsAPI,
+  healthcareFacilitiesAPI,
+  assignmentAPI,
+  appointmentsAPI,
 };

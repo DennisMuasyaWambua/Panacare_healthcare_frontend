@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Menu,
   X,
@@ -7,23 +7,19 @@ import {
   ChevronDown,
   LayoutDashboard,
   User2Icon,
+  LogOut
 } from "lucide-react";
 import { FaClinicMedical, FaDiagnoses, FaUserNurse } from "react-icons/fa";
 import { MdWifiProtectedSetup } from "react-icons/md";
 import { VscOrganization } from "react-icons/vsc";
 import Image from "next/image";
 import { directNavigate } from "../../utils/router";
+import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = () => {
-  // Set auth token on component mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pana_access_token', 'sidebar_token_' + Date.now());
-      console.log('Sidebar mounted, token set');
-    }
-  }, []);
-
+  const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -41,9 +37,8 @@ const Sidebar = () => {
     return getCurrentPath() === path;
   };
   
-  // Check if a path is part of the current path
-  const checkActiveSub = (path) => {
-    return getCurrentPath().startsWith(path);
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -128,7 +123,7 @@ const Sidebar = () => {
                 onClick={() => {
                   console.log('Navigating to patients page');
                   // Set extra tokens for good measure
-                  localStorage.setItem('pana_access_token', 'patients_nav_token');
+                  // Removed token setting that was causing conflicts
                   directNavigate('/dashboard/patients');
                 }}
               >
@@ -155,7 +150,7 @@ const Sidebar = () => {
                 onClick={() => {
                   console.log('Navigating to doctors page');
                   // Set extra tokens for good measure
-                  localStorage.setItem('pana_access_token', 'doctors_nav_token');
+                  // Removed token setting that was causing conflicts
                   directNavigate('/dashboard/doctors');
                 }}
               >
@@ -228,6 +223,17 @@ const Sidebar = () => {
               />
             </li>
           </ul>
+          
+          {/* Logout button */}
+          <div className="mt-auto px-4 py-6 border-t border-gray-100">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-red-500 hover:text-red-700 w-full px-2 py-2 hover:bg-red-50 rounded"
+            >
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
+          </div>
         </nav>
       </div>
     </>

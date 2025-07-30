@@ -1,6 +1,8 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/navigation';
+import authUtils from '../utils/authUtils';
 
 const AuthContext = createContext();
 
@@ -16,90 +18,87 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const router = useRouter();
 
   // Check if user is authenticated on app load
   useEffect(() => {
+    const checkAuth = () => {
+      try {
+        // Always cleanup conflicting tokens first
+        authUtils.cleanupConflictingTokens();
+        
+        // Check if we're in the process of logging out
+        if (authUtils.isLoggingOut()) {
+          setUser(null);
+          authUtils.completeLogout();
+          return;
+        }
+        
+        // Check if we have an authenticated session
+        if (authUtils.isAuthenticated()) {
+          // Load user data
+          const userData = authUtils.getUserData();
+          setUser(userData);
+        } else {
+          // Not authenticated, clear user
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+        setIsInitialized(true);
+      }
+    };
+
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
+  const login = useCallback((loginResponse) => {
     try {
-      // Use synchronous localStorage access to prevent race conditions
-      const token = localStorage.getItem('access_token');
-      const userData = localStorage.getItem('user_data');
+      // Store authentication data
+      const success = authUtils.storeAuthData(loginResponse);
       
-      if (token && userData) {
-        setUser(JSON.parse(userData));
+      // Update local state
+      if (success && loginResponse.user) {
+        setUser(loginResponse.user);
       }
-    } catch (error) {
-      console.error('Auth check error:', error);
-      // Clear any corrupted data
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem('user_data');
-      localStorage.removeItem('user_roles');
-      localStorage.removeItem('role_data');
-      setUser(null);
-    } finally {
-      setLoading(false);
-      setIsInitialized(true);
-    }
-  };
-
-  const login = (loginResponse) => {
-    try {
-      // Store tokens
-      localStorage.setItem('access_token', loginResponse.access);
-      localStorage.setItem('refresh_token', loginResponse.refresh);
       
-      // Store user data
-      localStorage.setItem('user_data', JSON.stringify(loginResponse.user));
-      
-      // Store roles for easy access
-      localStorage.setItem('user_roles', JSON.stringify(loginResponse.roles));
-      
-      // Store role data if needed
-      localStorage.setItem('role_data', JSON.stringify(loginResponse.role_data));
-      
-      // Set user state
-      setUser(loginResponse.user);
-      
-      return true;
+      return success;
     } catch (error) {
       console.error('Login error:', error);
       return false;
     }
-  };
+  }, []);
 
-  const logout = () => {
-    // First clear the user state to prevent protected route redirects
+  const logout = useCallback(() => {
+    // Start by setting the logout flag
+    authUtils.startLogout();
+    
+    // Clear user state immediately
     setUser(null);
     
-    // Then clear localStorage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_data');
-    localStorage.removeItem('user_roles');
-    localStorage.removeItem('role_data');
+    // Complete the logout (clear all data) 
+    authUtils.completeLogout();
     
-    // Router navigation will happen in the component that calls logout
-    // This prevents flickering by avoiding direct window.location changes
-  };
+    // Force a clean page reload to avoid any stale state
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  }, []);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem('access_token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-  };
+  const getAuthHeaders = useCallback(() => {
+    return authUtils.getAuthHeaders();
+  }, []);
 
-  const hasRole = (roleName) => {
-    const roles = JSON.parse(localStorage.getItem('user_roles') || '[]');
-    return roles.includes(roleName);
-  };
+  const hasRole = useCallback((roleName) => {
+    return authUtils.hasRole(roleName);
+  }, []);
 
-  const getRoleData = (roleName) => {
-    const roleData = JSON.parse(localStorage.getItem('role_data') || '{}');
-    return roleData[roleName] || null;
-  };
+  const getRoleData = useCallback(() => {
+    return {}; // Simplified for now, can be expanded if needed
+  }, []);
 
   // Use useMemo to prevent unnecessary re-renders
   const value = useMemo(() => ({
@@ -110,12 +109,13 @@ export const AuthProvider = ({ children }) => {
     getAuthHeaders,
     hasRole,
     getRoleData,
-    isAuthenticated: !!user,
+    isAuthenticated: authUtils.isAuthenticated(),
+    isLoggingOut: authUtils.isLoggingOut(),
     isInitialized,
     // Keep backward compatibility
     isReady: !loading,
     setAuthenticated: (value) => setUser(value ? user : null)
-  }), [user, loading, isInitialized]);
+  }), [user, loading, login, logout, getAuthHeaders, hasRole, getRoleData, isInitialized]);
 
   return (
     <AuthContext.Provider value={value}>

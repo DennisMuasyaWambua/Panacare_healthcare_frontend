@@ -25,7 +25,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/users/register-admin/", {
+      const res = await fetch("https://panacaredjangobackend-production.up.railway.app/api/users/register-admin/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -36,7 +36,10 @@ export default function RegisterPage() {
       const data = await res.json();
       if (res.ok) {
         toast.success("Registration successful! Please login.");
-        router.push("/login");
+        // Use replace instead of push to avoid history stack issues
+        setTimeout(() => {
+          router.replace("/login");
+        }, 10);
       } else {
         toast.error(data.detail || "Registration failed");
       }
