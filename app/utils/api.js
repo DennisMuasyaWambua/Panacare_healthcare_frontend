@@ -418,6 +418,51 @@ const withFallback = async (apiCall, fallbackData, errorMessage = "API error") =
   }
 };
 
+// Subscription Packages API calls
+export const packagesAPI = {
+  getAllPackages: async () => {
+    return await apiRequest("/api/packages/", { method: "GET" });
+  },
+  
+  getPackageById: async (id) => {
+    return await apiRequest(`/api/packages/${id}/`, { method: "GET" });
+  },
+  
+  addPackage: async (packageData) => {
+    return await apiRequest("/api/packages/", {
+      method: "POST",
+      body: JSON.stringify(packageData),
+    });
+  },
+  
+  updatePackage: async (id, packageData) => {
+    return await apiRequest(`/api/packages/${id}/`, {
+      method: "PUT",
+      body: JSON.stringify(packageData),
+    });
+  },
+  
+  deletePackage: async (id) => {
+    return await apiRequest(`/api/packages/${id}/`, {
+      method: "DELETE",
+    });
+  },
+  
+  exportPackagesToPdf: async () => {
+    return await apiRequest("/api/packages/export/pdf/", { 
+      method: "GET", 
+      responseType: 'blob' 
+    });
+  },
+  
+  exportPackagesToCsv: async () => {
+    return await apiRequest("/api/packages/export/csv/", { 
+      method: "GET", 
+      responseType: 'blob' 
+    });
+  },
+};
+
 export default {
   authAPI,
   doctorsAPI,
@@ -425,4 +470,5 @@ export default {
   healthcareFacilitiesAPI,
   assignmentAPI,
   appointmentsAPI,
+  packagesAPI,
 };

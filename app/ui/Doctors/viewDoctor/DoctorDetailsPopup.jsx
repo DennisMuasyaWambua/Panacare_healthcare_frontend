@@ -1,15 +1,40 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { X, CheckCircle, XCircle } from "lucide-react";
+import { doctorsAPI } from "../../../utils/api";
+import { toast } from "react-toastify";
 
 export const DoctorDetailsPopup = ({ doctor, onClose, onVerify }) => {
   // Safety check for doctor object
   const safeDoctor = doctor || {};
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerified, setIsVerified] = useState(safeDoctor.is_verified || false);
   
   // Handle verification
-  const handleVerify = () => {
-    if (onVerify && safeDoctor.id) {
-      onVerify(safeDoctor.id);
+  const handleVerify = async () => {
+    try {
+      setIsVerifying(true);
+      
+      if (!safeDoctor.id) {
+        toast.error("Doctor ID not found. Cannot verify.");
+        return;
+      }
+      
+      // Call API to verify doctor
+      await doctorsAPI.verifyDoctor(safeDoctor.id);
+      
+      setIsVerified(true);
+      toast.success("Doctor verification successful!");
+      
+      // Call parent component's onVerify if provided
+      if (onVerify) {
+        onVerify(safeDoctor.id);
+      }
+    } catch (error) {
+      console.error("Error verifying doctor:", error);
+      toast.error("Failed to verify doctor. Please try again.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -54,7 +79,7 @@ export const DoctorDetailsPopup = ({ doctor, onClose, onVerify }) => {
           <div>
             <p className="text-gray-500">Verification Status</p>
             <p className="font-semibold flex items-center">
-              {safeDoctor.is_verified ? (
+              {isVerified || safeDoctor.is_verified ? (
                 <>
                   <CheckCircle className="mr-2 text-green-500" size={16} />
                   Verified
@@ -93,12 +118,13 @@ export const DoctorDetailsPopup = ({ doctor, onClose, onVerify }) => {
 
         {/* Actions */}
         <div className="mt-6 flex justify-end">
-          {!safeDoctor.is_verified && (
+          {!isVerified && !safeDoctor.is_verified && (
             <button
               onClick={handleVerify}
-              className="px-4 py-2 bg-green-500 text-white rounded mr-2"
+              disabled={isVerifying}
+              className="px-4 py-2 bg-green-500 text-white rounded mr-2 disabled:bg-green-300"
             >
-              Verify Doctor
+              {isVerifying ? "Verifying..." : "Verify Doctor"}
             </button>
           )}
           <button

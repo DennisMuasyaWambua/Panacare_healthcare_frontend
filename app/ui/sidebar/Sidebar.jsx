@@ -160,19 +160,27 @@ const Sidebar = () => {
 
             <li
               className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/clinics")
+                checkActive("/dashboard/facilities")
                   ? "text-[#29AAE1]"
                   : "text-gray-600"
               } hover:text-[#29AAE1]`}
             >
               <FaClinicMedical
                 className={`${
-                  checkActive("/dashboard/clinics")
+                  checkActive("/dashboard/facilities")
                     ? "text-[#29AAE1]"
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <span className="text-base font-medium">Manage Clinics</span>
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to facilities page');
+                  directNavigate('/dashboard/facilities');
+                }}
+              >
+                Manage Clinics
+              </button>
             </li>
 
             <li
@@ -189,7 +197,15 @@ const Sidebar = () => {
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <span className="text-base font-medium">System Setup</span>
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to system setup page');
+                  directNavigate('/dashboard/system-setup');
+                }}
+              >
+                System Setup
+              </button>
               <ChevronDown
                 className={`${
                   checkActive("/dashboard/system-setup")
@@ -213,7 +229,15 @@ const Sidebar = () => {
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
-              <span className="text-base font-medium">Manage Users</span>
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to manage users page');
+                  directNavigate('/dashboard/manage-users');
+                }}
+              >
+                Manage Users
+              </button>
               <ChevronDown
                 className={`${
                   checkActive("/dashboard/manage-users")
@@ -221,6 +245,39 @@ const Sidebar = () => {
                     : "text-gray-600"
                 } hover:text-[#29AAE1]`}
               />
+            </li>
+            
+            <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                checkActive("/dashboard/subscriptions")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
+                  checkActive("/dashboard/subscriptions")
+                    ? "text-[#29AAE1]"
+                    : "text-gray-600"
+                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 22H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2Z"></path>
+                <path d="M18 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path>
+                <path d="M10 2v3"></path>
+                <path d="M14 2v3"></path>
+                <circle cx="8" cy="10" r="1"></circle>
+                <circle cx="16" cy="10" r="1"></circle>
+                <circle cx="8" cy="14" r="1"></circle>
+                <circle cx="16" cy="14" r="1"></circle>
+                <path d="m6 18 12 .01"></path>
+              </svg>
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to subscriptions page');
+                  directNavigate('/dashboard/subscriptions');
+                }}
+              >
+                Subscriptions
+              </button>
             </li>
           </ul>
           
