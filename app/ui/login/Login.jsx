@@ -66,72 +66,16 @@ const Login = () => {
         </div>
         
         <div className="relative w-64 h-96 mx-auto">
-          <div className="border-8 border-black rounded-3xl overflow-hidden h-full w-full relative">
-            {/* Phone Screen Content */}
-            <div className="bg-white h-full w-full p-2">
-              {/* App Header */}
-              <div className="flex justify-between items-center p-2">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-gray-300"></div>
-                  <span className="ml-2 text-black text-xs">Email</span>
-                </div>
-                <Image src="/logo.jpg" alt="panacarelogo.png" width={100} height={100}/>
-                <div className="w-4 h-4"></div>
-              </div>
-              
-              {/* Content Area */}
-              <div className="mt-4 p-2">
-                <p className="text-black text-xs mb-2">Welcome to</p>
-                {/* Banner Image */}
-                <div className="rounded-lg mb-4 w-full h-16 relative">
-                  <div className="bg-gray-200 rounded-lg w-full h-full flex items-center justify-center">
-                    <p className="text-black text-xs">Exceptional care for you and your family</p>
-                  </div>
-                </div>
-                
-                {/* Menu Tiles */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-blue-500 rounded-lg p-2 text-white text-xs h-16 flex flex-col items-center justify-center">
-                    <div className="w-6 h-6 mb-1 bg-white rounded-full"></div>
-                    <span>Telehealth</span>
-                  </div>  
-                  <div className="bg-blue-500 rounded-lg p-2 text-white text-xs h-16 flex flex-col items-center justify-center">
-                    <div className="w-6 h-6 mb-1 bg-white rounded-full"></div>
-                    <span>Resources</span>
-                  </div>
-                  <div className="bg-blue-500 rounded-lg p-2 text-white text-xs h-16 flex flex-col items-center justify-center">
-                    <div className="w-6 h-6 mb-1 bg-white rounded-full"></div>
-                    <span>Find a Doctor</span>
-                  </div>
-                  <div className="bg-blue-500 rounded-lg p-2 text-white text-xs h-16 flex flex-col items-center justify-center">
-                    <div className="w-6 h-6 mb-1 bg-white rounded-full"></div>
-                    <span>Schedule Visit</span>
-                  </div>
-                </div>
-                
-                {/* Bottom Button */}
-                <div className="mt-4 bg-blue-500 rounded-lg p-2 text-white text-center">
-                  <span className="text-xs">Let's talk</span>
-                </div>
-              </div>
-              
-              {/* Bottom Navigation */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-around items-center bg-white p-2 border-t border-gray-200">
-                <div className="w-6 h-6"></div>
-                <div className="w-6 h-6"></div>
-                <div className="w-6 h-6"></div>
-                <div className="w-6 h-6"></div>
-              </div>
-            </div>
-          </div>
+          <Image 
+            src="/frame.png" 
+            alt="Phone Image" 
+            layout="fill" 
+            objectFit="contain" 
+            className="absolute bottom-0 left-0 right-0 top-0"
+          />
         </div>
         
-        {/* Pagination Dots */}
-        <div className="flex mt-6 space-x-2">
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-          <div className="w-2 h-2 bg-white opacity-50 rounded-full"></div>
-          <div className="w-2 h-2 bg-white opacity-50 rounded-full"></div>
-        </div>
+       
       </div>
 
       {/* Right Side - Login Form */}
