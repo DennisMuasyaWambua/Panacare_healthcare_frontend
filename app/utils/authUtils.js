@@ -171,7 +171,8 @@ export const getAuthHeaders = () => {
   if (typeof window === 'undefined') return {};
   
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+  console.log(token);
+  return token ? { 'Authorization': `${token}` } : {};
 };
 
 /**

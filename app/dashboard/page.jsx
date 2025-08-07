@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -10,6 +10,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronUp, ChevronDown, Search } from "lucide-react";
+import authUtils from "../utils/authUtils";
+
+
 
 const sampleData1 = [
   { name: "Jan", value: 10000 },
@@ -26,11 +29,12 @@ const sampleData1 = [
   { name: "Dec", value: 30000 },
 ];
 
+  
 const sampleData2 = [
   { name: "Jan", active: 20000, inactive: 5000 },
   { name: "Feb", active: 22000, inactive: 4000 },
   { name: "Mar", active: 21000, inactive: 4500 },
-  { name: "Apr", active: 23000, inactive: 4000 },
+  { name: "Apr", active: 23000, inactive: 4000 }, 
   { name: "May", active: 25000, inactive: 3500 },
   { name: "Jun", active: 27000, inactive: 3000 },
   { name: "Jul", active: 29000, inactive: 2500 },
@@ -42,7 +46,106 @@ const sampleData2 = [
 ];
 
 const Dashboard = () => {
+
+  const [number_of_patients, setNumberOfPatients] = useState("0");
+  const [number_of_doctors, setNumberOfDoctors] = useState("0");
+  const [number_of_hospitals, setNumberOfHospitals] = useState("0");
+  const [number_of_subscriptions, setNumberOfSubscriptions] = useState("0");
+  const [number_of_inactive_subscriptions, setNumberOfInactiveSubscriptions] = useState("0");
+  const [number_of_active_patients, setNumberOfActivePatients] = useState("0");
+  const [number_of_inactive_patients, setNumberOfInactivePatients] = useState("0");
+  const [number_of_active_doctors, setNumberOfActiveDoctors] = useState("0");
+  const [number_of_inactive_doctors, setNumberOfInactiveDoctors] = useState("0");
+  const [number_of_active_hospitals, setNumberOfActiveHospitals] = useState("0");
+
+  useEffect(() => {
+    const handledashboard = async () => {
+      // This function can be used to handle any data that is to appear on the dashboard
+    
+
+      const token = authUtils.getAuthHeaders();
+      console.log("Auth token:", token.Authorization);
+     
+      if (!token) {
+        console.error("No auth token found");
+        return;
+      }
+      // Fetching patients data
+      const patients_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/patients/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.Authorization}`,
+        },
+      });
+
+      const data = await patients_data.json();
+      console.log("Patients data:", data);
+
+      const number_of_patients = data.length;
+      setNumberOfPatients(number_of_patients);
+      // setNumberOfActivePatients(data.filter(patient => patient.status === "active").length);
+      // console.log("Active Patients:", data.filter(patient => patient.status === "active").length);
+      // setNumberOfInactivePatients(data.filter(patient => patient.status === "inactive").length);
+      // console.log("Inactive Patients:", data.filter(patient => patient.status === "inactive").length);
+
+      // fetching doctors data
+
+      const doctors_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/doctors/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.Authorization}`,
+        },
+      });
+
+      const doctors = await doctors_data.json();
+      console.log("Doctors data:", doctors);
+      setNumberOfDoctors(doctors.length);
+
+      // Hospitals
+      const hospitals_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/healthcare/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.Authorization}`,
+        },
+      });
+
+      const hospitals = await hospitals_data.json();
+      console.log("Hospitals data:", hospitals);
+      setNumberOfHospitals(hospitals.length);
+
+      // Number of subscriptions
+      const subscriptions_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/subscriptions/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.Authorization}`,
+        },
+      });
+
+      const subscriptions = await subscriptions_data.json();
+      console.log("Subscriptions data:", subscriptions);
+      // filtering subscriptions to get the number of active subscriptions
+      const activeSubscriptions = subscriptions.filter(subscription => subscription.package_details.is_active == true);
+      console.log("Active Subscriptions:", activeSubscriptions.length);
+      setNumberOfSubscriptions(subscriptions.length);
+
+      const inactiveSubscriptions = subscriptions.filter(subscription => subscription.package_details.is_active == false);
+      console.log("Inactive Subscriptions:", inactiveSubscriptions.length);
+      setNumberOfInactiveSubscriptions(inactiveSubscriptions.length);
+      
+
+    };
+
+
+
+    handledashboard();
+  }, []);
+ 
   return (
+    
     <div className="p-6 px-6 bg-gray-50 min-h-screen">
       {/* Search Bar */}
       <div className="mb-6">
@@ -58,15 +161,17 @@ const Dashboard = () => {
 
       {/* Patients Section */}
       <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Patients</h1>
+     
       <Section
         title="Patients"
+       
         firstCard={[
-          { label: "Registered Patients", value: "948,558", trend: "up" },
+          { label: "Registered Patients", value:number_of_patients , trend: "up" },
           { label: "Average Monthly Patients", value: "79,046", trend: "up" },
         ]}
         secondCard={[
-          { label: "Total Active Patients", value: "200,558", trend: "up" },
-          { label: "Total Inactive Patients", value: "16,558", trend: "down" },
+          { label: "Total Active Patients", value: number_of_patients, trend: "up" },
+          { label: "Total Inactive Patients", value: number_of_inactive_patients, trend: "down" },
         ]}
         charts={[
           {
@@ -90,12 +195,12 @@ const Dashboard = () => {
       <Section
         title="Doctors"
         firstCard={[
-          { label: "Registered Doctors", value: "12,345", trend: "up" },
+          { label: "Registered Doctors", value: number_of_doctors, trend: "up" },
           { label: "Average Monthly Doctors", value: "1,234", trend: "up" },
         ]}
         secondCard={[
-          { label: "Total Active Doctors", value: "10,123", trend: "up" },
-          { label: "Total Inactive Doctors", value: "2,222", trend: "down" },
+          { label: "Total Active Doctors", value: number_of_doctors, trend: "up" },
+          { label: "Total Inactive Doctors", value: number_of_inactive_doctors, trend: "down" },
         ]}
         charts={[
           {
@@ -119,12 +224,12 @@ const Dashboard = () => {
       <Section
         title="Hospitals"
         firstCard={[
-          { label: "Registered Facilities", value: "5,678", trend: "up" },
+          { label: "Registered Facilities", value: number_of_hospitals, trend: "up" },
           { label: "Average Monthly Facilities", value: "567", trend: "up" },
         ]}
         secondCard={[
-          { label: "Total Active Facilities", value: "4,890", trend: "up" },
-          { label: "Total Inactive Facilities", value: "788", trend: "down" },
+          { label: "Total Active Facilities", value: number_of_hospitals, trend: "up" },
+          { label: "Total Inactive Facilities", value: "0", trend: "down" },
         ]}
         charts={[
           {
@@ -150,12 +255,12 @@ const Dashboard = () => {
       <Section
         title="Subscriptions"
         firstCard={[
-          { label: "Basic Package", value: "1,234", trend: "up" },
-          { label: "Bronze Package", value: "567", trend: "up" },
+          { label: "Active subscriptions", value: number_of_subscriptions, trend: "up" },
+          // { label: "Bronze Package", value: "567", trend: "up" },
         ]}
         secondCard={[
-          { label: "Silver Package", value: "890", trend: "up" },
-          { label: "Gold Package", value: "345", trend: "up" },
+          { label: "Inactive subscriptions", value: number_of_inactive_subscriptions, trend: "down" },
+          // { label: "Gold Package", value: "345", trend: "up" },
         ]}
         charts={[]}
       />

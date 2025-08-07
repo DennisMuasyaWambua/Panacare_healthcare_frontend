@@ -29,7 +29,8 @@ const Login = () => {
       
       const data = await response.json();
       console.log("API login response:", data);
-      
+      // store token on authetication
+      authUtils.storeAuthData(data);
       if (response.ok && data.access) {
         // Process login through AuthContext
         const loginSuccess = login(data);
