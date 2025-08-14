@@ -48,8 +48,8 @@ const Blog = () => {
   const [isExportingpdf, setIsExportingpdf] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
 
-  useEffect(() => {
-    const fetchArticles = async () => {
+
+  const fetchArticles = async () => {
       try {
         setIsLoading(true);
         setError(null);
@@ -64,6 +64,8 @@ const Blog = () => {
         setIsLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchArticles();
   }, []);
 
@@ -80,24 +82,35 @@ const Blog = () => {
   const handleStatusFilter = (e) => setStatusFilter(e.target.value);
 
   const handleApprove = async (article) => {
-    try {
-      await articlesAPI.Approvearticle(article.id);
-      toast.success(`Approved Successfully`);
-    } catch (error) {
-      toast.error("Failed to approve article");
-      console.error(error);
+  try {
+    const response = await articlesAPI.Approvearticle(article.id);
+    if (response?.error) {
+      toast.error(`Article is already approved`);
+      return;
     }
-  };
 
-  const handleReject = async (article) => {
-    try {
-      await articlesAPI.Rejectarticle(article.id);
-      toast.error(`Rejected Successfully`);
-    } catch (error) {
-      toast.error("Failed to reject article");
-      console.error(error);
+    fetchArticles();
+    toast.success("Approved Successfully");
+  } catch (error) {
+    console.error("Approval error:", error);
+  }
+};
+
+ const handleReject = async (article) => {
+  try {
+    const response = await articlesAPI.Rejectarticle(article.id);
+    if (response?.error) {
+      toast.error(`Article is already Rejected`);
+      return;
     }
-  };
+
+    fetchArticles();
+    toast.success(" Rejected Successfully");
+  } catch (error) {
+    console.error("Rejection error:", error);
+  }
+};
+
 
   const handleRowSelect = (id) => {
     setSelectedRows((prev) =>
@@ -220,12 +233,12 @@ const Blog = () => {
       sortable: true,
       cell: (row) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${row.is_published
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${row.is_approved
             ? "bg-green-100 text-green-800"
             : "bg-yellow-100 text-yellow-800"
             }`}
         >
-          {row.is_published ? "Published" : "Draft"}
+          {row.is_approved ? "Approved" : "Pending"}
         </span>
       ),
     },
