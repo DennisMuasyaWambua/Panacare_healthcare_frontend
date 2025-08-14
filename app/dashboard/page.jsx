@@ -11,6 +11,9 @@ import {
 } from "recharts";
 import { ChevronUp, ChevronDown, Search } from "lucide-react";
 import authUtils from "../utils/authUtils";
+import { useAuth } from "../context/AuthContext";
+import { doctorsAPI, patientsAPI, healthcareFacilitiesAPI } from "../utils/api";
+
 
 
 
@@ -46,6 +49,7 @@ const sampleData2 = [
 ];
 
 const Dashboard = () => {
+  const { user, logout } = useAuth();
 
   const [number_of_patients, setNumberOfPatients] = useState("0");
   const [number_of_doctors, setNumberOfDoctors] = useState("0");
@@ -60,60 +64,32 @@ const Dashboard = () => {
 
   useEffect(() => {
     const handledashboard = async () => {
-      // This function can be used to handle any data that is to appear on the dashboard
-    
+      try {
+        // Fetching patients data
+        const patientsData = await patientsAPI.getAllPatients();
+        console.log("Patients data:", patientsData);
 
-      const token = authUtils.getAuthHeaders();
-      console.log("Auth token:", token.Authorization);
-     
-      if (!token) {
-        console.error("No auth token found");
-        return;
+        if (Array.isArray(patientsData)) {
+          setNumberOfPatients(patientsData.length);
+        }
+        // Fetching doctors data
+        const doctorsData = await doctorsAPI.getAllDoctors();
+        console.log("Doctors data:", doctorsData);
+        
+        if (Array.isArray(doctorsData)) {
+          setNumberOfDoctors(doctorsData.length);
+        }
+
+        // Hospitals
+        const hospitalsData = await healthcareFacilitiesAPI.getAllFacilities();
+        console.log("Hospitals data:", hospitalsData);
+        
+        if (Array.isArray(hospitalsData)) {
+          setNumberOfHospitals(hospitalsData.length);
+        }
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
       }
-      // Fetching patients data
-      const patients_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/patients/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.Authorization}`,
-        },
-      });
-
-      const data = await patients_data.json();
-      console.log("Patients data:", data);
-
-      const number_of_patients = data.length;
-      setNumberOfPatients(number_of_patients);
-      // setNumberOfActivePatients(data.filter(patient => patient.status === "active").length);
-      // console.log("Active Patients:", data.filter(patient => patient.status === "active").length);
-      // setNumberOfInactivePatients(data.filter(patient => patient.status === "inactive").length);
-      // console.log("Inactive Patients:", data.filter(patient => patient.status === "inactive").length);
-
-      // fetching doctors data
-
-      const doctors_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/doctors/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.Authorization}`,
-        },
-      });
-
-      const doctors = await doctors_data.json();
-      console.log("Doctors data:", doctors);
-      setNumberOfDoctors(doctors.length);
-
-      // Hospitals
-      const hospitals_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/healthcare/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.Authorization}`,
-        },
-      });
-
-      const hospitals = await hospitals_data.json();
-      console.log("Hospitals data:", hospitals);
       setNumberOfHospitals(hospitals.length);
 
       // Number of subscriptions
@@ -145,9 +121,30 @@ const Dashboard = () => {
   }, []);
  
   return (
+
     
     <div className="p-6 px-6 bg-gray-50 min-h-screen">
+      <div className="w-32 h-8 relative">
+  <div className="left-0 top-0 absolute justify-start text-fuchsia-900 text-xl font-normal font-['Poppins']">Dashboard</div></div>
+  <div className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">👋🏾 Welcome Back,  {user ? `${user.first_name}` : 'User'} </div>
+
+   {/* User profile information  */}
+  <div className="inline-flex justify-end items-center gap-6">
+    <div className="absolute top-0 right-0 m-4 inline-flex justify-end items-center gap-6">
+      <div className="w-8 h-8 relative overflow-hidden">
+        <div className="w-5 h-7 left-[5.50px] top-[2.25px] absolute bg-gray-700" />
+      </div>
+      <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />
+      <div className="justify-start text-sky-500 text-base font-normal font-['Poppins']">{user.first_name}</div>
+      <div className="justify-start text-sky-500 text-base font-normal font-['Poppins']">{user.last_name}</div>
+    </div>
+  
+  </div>
+
       {/* Search Bar */}
+      <div className="w-32 h-8 relative">
+       
+      </div>
       <div className="mb-6">
         <div className="flex items-center bg-white shadow-sm rounded-lg px-4 py-2">
           <Search className="text-gray-400" size={20} />

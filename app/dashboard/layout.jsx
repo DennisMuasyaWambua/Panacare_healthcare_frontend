@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
   return (
     <ProtectedRoute>
       <div className="flex flex-col h-screen bg-gray-50">
-        <Navbar />
+        {/* <Navbar/> */}
         <div className="flex flex-1">
           <Sidebar />
           <div className="flex-1 overflow-auto">{children}</div>

@@ -172,7 +172,7 @@ export const getAuthHeaders = () => {
   
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
   console.log(token);
-  return token ? { 'Authorization': `${token}` } : {};
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
 /**

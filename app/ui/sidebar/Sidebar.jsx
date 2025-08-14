@@ -279,6 +279,28 @@ const Sidebar = () => {
                 Subscriptions
               </button>
             </li>
+                        <li
+              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
+                checkActive("/dashboard/subscriptions")
+                  ? "text-[#29AAE1]"
+                  : "text-gray-600"
+              } hover:text-[#29AAE1]`}
+            >
+              <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14 10.4551H3V12.4551H14V10.4551ZM14 6.45508H3V8.45508H14V6.45508ZM3 16.4551H10V14.4551H3V16.4551ZM21.5 11.9551L23 13.4551L16 20.4551L11.5 15.9551L13 14.4551L16 17.4551L21.5 11.9551Z" fill="#AAAAAA"/>
+              </svg>
+
+              <button 
+                className="text-base font-medium text-left"
+                onClick={() => {
+                  console.log('Navigating to subscriptions page');
+                  directNavigate('/dashboard/subscriptions');
+                }}
+              >
+                 Add Subscriptions
+              </button>
+            </li>
+            
           </ul>
           
           {/* Logout button */}
