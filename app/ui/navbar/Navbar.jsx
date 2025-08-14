@@ -14,8 +14,12 @@ const Navbar = () => {
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-gray-100 shadow-md">
       {/* Left Section */}
-      <div className="text-lg font-semibold text-[#800000]">Dashboard</div>
-
+      <div>
+        <div className="text-lg font-semibold text-[#800000]">Dashboard</div>
+        <div className="text-md font-bold text-gray-800">
+          🖐🏿 Welcome Back <span className="text-[#29AAE1]">Admin</span>
+        </div>
+      </div>
       {/* Right Section */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
@@ -24,7 +28,7 @@ const Navbar = () => {
             {user ? `${user.first_name} ${user.last_name}` : 'User'}
           </span>
         </div>
-        <button 
+        <button
           onClick={handleLogout}
           className="flex items-center gap-1 text-red-500 hover:text-red-700"
         >
