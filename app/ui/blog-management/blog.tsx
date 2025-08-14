@@ -4,6 +4,36 @@ import { Search, X, AlertCircle, Download, Eye, MoreVertical } from "lucide-reac
 import { articlesAPI } from "../../utils/api";
 import { toast } from "react-toastify";
 import CustomTable from "../../components/CustomTable";
+import { createPortal } from "react-dom";
+
+const DropdownMenu = ({ position, onAction }) => {
+  return createPortal(
+    <div
+      className="absolute bg-white border border-purple-400 rounded shadow z-[9999]"
+      style={{
+        top: position.top,
+        left: position.left,
+        minWidth: "120px",
+        borderStyle: "dashed",
+      }}
+    >
+      {["View", "Approve", "Reject"].map((action, i) => (
+        <button
+          key={i}
+          onClick={() => onAction(action)}
+          className="block w-full text-left px-3 py-2 hover:bg-purple-50"
+          style={{
+            borderBottom: i < 2 ? "1px dashed #A855F7" : "none",
+            color: "#4B0082",
+          }}
+        >
+          {action}
+        </button>
+      ))}
+    </div>,
+    document.body
+  );
+};
 
 const Blog = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +45,8 @@ const Blog = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [isExportingpdf, setIsExportingpdf] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -36,16 +67,36 @@ const Blog = () => {
     fetchArticles();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openDropdown) setOpenDropdown(null);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [openDropdown]);
+
   const handleSearch = (e) => setSearchQuery(e.target.value);
   const handleCategoryFilter = (e) => setCategoryFilter(e.target.value);
   const handleStatusFilter = (e) => setStatusFilter(e.target.value);
 
-  const handleApprove = (article) => {
-    toast.success(`Approved: ${article.title}`);
+  const handleApprove = async (article) => {
+    try {
+      await articlesAPI.Approvearticle(article.id);
+      toast.success(`Approved Successfully`);
+    } catch (error) {
+      toast.error("Failed to approve article");
+      console.error(error);
+    }
   };
 
-  const handleReject = (article) => {
-    toast.error(`Rejected: ${article.title}`);
+  const handleReject = async (article) => {
+    try {
+      await articlesAPI.Rejectarticle(article.id);
+      toast.error(`Rejected Successfully`);
+    } catch (error) {
+      toast.error("Failed to reject article");
+      console.error(error);
+    }
   };
 
   const handleRowSelect = (id) => {
@@ -57,10 +108,20 @@ const Blog = () => {
   const openModal = (article) => setModalArticle(article);
   const closeModal = () => setModalArticle(null);
 
+  const handleDropdownAction = (action, row) => {
+    if (action === "View") {
+      openModal(row);
+    } else if (action === "Approve") {
+      handleApprove(row);
+    } else if (action === "Reject") {
+      handleReject(row);
+    }
+    setOpenDropdown(null);
+  };
+
   const exportToCsv = async () => {
     try {
       setIsExporting(true);
-      // Assume API exists for articles export
       const response = await articlesAPI.exportArticlesToCsv();
       const url = window.URL.createObjectURL(new Blob([response]));
       const link = document.createElement("a");
@@ -78,6 +139,29 @@ const Blog = () => {
       toast.error("Failed to export articles data");
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const exportToPdf = async () => {
+    try {
+      setIsExportingpdf(true);
+      const response = await articlesAPI.exportArticlesToCsv();
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `articles_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      toast.success("Articles data exported successfully");
+    } catch (error) {
+      console.error("Error exporting articles data:", error);
+      toast.error("Failed to export articles data");
+    } finally {
+      setIsExportingpdf(false);
     }
   };
 
@@ -159,45 +243,23 @@ const Blog = () => {
     {
       name: "Actions",
       cell: (row) => (
-        <div className="relative">
-          <button
-            onClick={() =>
-              setOpenDropdownId(openDropdownId === row.id ? null : row.id)
-            }
-            className="p-1"
-          >
-            <MoreVertical size={18} />
-          </button>
-
-          {openDropdownId === row.id && (
-            <div
-              className="absolute right-0 mt-1 bg-white border border-purple-400 rounded shadow z-50"
-              style={{
-                borderStyle: "dashed",
-                minWidth: "120px",
-              }}
-            >
-              {["View", "Approve", "Reject"].map((action, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    if (action === "View") openModal(row);
-                    if (action === "Approve") handleApprove(row);
-                    if (action === "Reject") handleReject(row);
-                    setOpenDropdownId(null);
-                  }}
-                  className="block w-full text-left px-3 py-2 hover:bg-purple-50"
-                  style={{
-                    borderBottom: i < 2 ? "1px dashed #A855F7" : "none",
-                    color: "#4B0082",
-                  }}
-                >
-                  {action}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const rect = e.currentTarget.getBoundingClientRect();
+            setOpenDropdown({
+              id: row.id,
+              row,
+              position: {
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX,
+              },
+            });
+          }}
+          className="p-1"
+        >
+          <MoreVertical size={18} />
+        </button>
       ),
       ignoreRowClick: true,
     },
@@ -240,7 +302,6 @@ const Blog = () => {
         Blog Management
       </h1>
 
-      {/* Filters + Export */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <label htmlFor="search" className="block text-black mb-2">
@@ -253,7 +314,7 @@ const Blog = () => {
               placeholder="Enter title..."
               value={searchQuery}
               onChange={handleSearch}
-              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
+              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none text-[#29AAE1]"
             />
             <Search className="absolute right-3 top-3 text-gray-400" size={20} />
           </div>
@@ -267,7 +328,7 @@ const Blog = () => {
             id="category"
             value={categoryFilter}
             onChange={handleCategoryFilter}
-            className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
+            className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none text-[#29AAE1]"
           >
             <option value="All">All</option>
             <option value="General Health">General Health</option>
@@ -283,7 +344,7 @@ const Blog = () => {
             id="status"
             value={statusFilter}
             onChange={handleStatusFilter}
-            className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
+            className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none text-[#29AAE1]"
           >
             <option value="All">All</option>
             <option value="Published">Published</option>
@@ -291,14 +352,24 @@ const Blog = () => {
           </select>
         </div>
 
-        <div className="flex flex-col justify-end">
+        <div className="flex items-end gap-2 h-full md:justify-end justify-center md:col-span-1 col-span-full">
           <button
-            onClick={exportToCsv}
-            className="w-full flex items-center justify-center px-4 py-2 bg-[#29AAE1] text-white rounded-lg font-semibold shadow hover:bg-blue-700 transition"
-            disabled={isExporting}
+            onClick={exportToPdf}
+            className="flex items-center justify-center px-4 py-2 bg-[#29AAE1] text-white rounded-lg font-semibold shadow hover:bg-blue-700 transition"
+            disabled={isExportingpdf}
+            type="button"
           >
             <Download className="mr-2" size={18} />
-            {isExporting ? "Exporting..." : "Export CSV"}
+            {isExportingpdf ? "Exporting..." : "Export pdf"}
+          </button>
+          <button
+            onClick={exportToCsv}
+            className="flex items-center justify-center px-4 py-2 bg-[#29AAE1] text-white rounded-lg font-semibold shadow hover:bg-blue-700 transition"
+            disabled={isExporting}
+            type="button"
+          >
+            <Download className="mr-2" size={18} />
+            {isExporting ? "Exporting..." : "Export csv"}
           </button>
         </div>
       </div>
@@ -306,6 +377,13 @@ const Blog = () => {
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
         {contentToRender}
       </div>
+
+      {openDropdown && (
+        <DropdownMenu
+          position={openDropdown.position}
+          onAction={(action) => handleDropdownAction(action, openDropdown.row)}
+        />
+      )}
 
       {modalArticle && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

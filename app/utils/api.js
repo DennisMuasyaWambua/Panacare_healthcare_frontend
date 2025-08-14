@@ -468,10 +468,21 @@ export const articlesAPI = {
   getAllArticles: async () => {
     return await apiRequest("/api/articles/", { method: "GET" });
   },
+  Approvearticle: async (id) => {
+    return await apiRequest(`/api/articles/${id}/approve/`, {
+      method: "POST"
+    });
+  },
+  Rejectarticle: async (id) => {
+    return await apiRequest(`/api/articles/${id}/reject/`, {
+      method: "POST"
+    });
+  },
   
   
-  exportPatientsToCsv: async () => {
-    return await apiRequest("/api/patients/export/", { 
+  
+  exportArticlesToCsv: async () => {
+    return await apiRequest("/api/articles/export/", { 
       method: "GET",
       responseType: 'blob' 
     });
