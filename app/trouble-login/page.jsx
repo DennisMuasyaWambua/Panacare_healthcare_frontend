@@ -17,7 +17,8 @@ export default function TroubleLoginPage() {
         </div>
         
         <div className="bg-white bg-opacity-20 p-6 rounded-lg max-w-xs w-full">
-          <h3 className="text-white font-semibold mb-4">Account Help</h3>
+           <Image src={"/curious.png"} alt="panacarelogo.png" width={300} height={300} className="mx-auto mb-4" />
+          {/* <h3 className="text-white font-semibold mb-4">Account Help</h3> */}
           <ul className="space-y-3 text-sm">
             <li className="flex items-center">
               <div className="w-4 h-4 bg-white rounded-full mr-3"></div>

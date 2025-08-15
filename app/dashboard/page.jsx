@@ -1,6 +1,7 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
-import {
+
   LineChart,
   Line,
   XAxis,
@@ -10,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronUp, ChevronDown, Search } from "lucide-react";
+
 import { 
   doctorsAPI, 
   patientsAPI, 
@@ -17,10 +19,12 @@ import {
   packagesAPI 
 } from "../utils/api";
 
+
 // Helper function to format numbers with commas
 const formatNumber = (num) => {
   return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
 };
+
 
 // Generate monthly data for charts based on total count
 const generateMonthlyData = (totalCount, trend = "increasing") => {
@@ -238,9 +242,32 @@ const Dashboard = () => {
     }
   }
   
+
   return (
+
+    
     <div className="p-6 px-6 bg-gray-50 min-h-screen">
+      <div className="w-32 h-8 relative">
+  <div className="left-0 top-0 absolute justify-start text-fuchsia-900 text-xl font-normal font-['Poppins']">Dashboard</div></div>
+  <div className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">👋🏾 Welcome Back,  {user ? `${user.first_name}` : 'User'} </div>
+
+   {/* User profile information  */}
+  <div className="inline-flex justify-end items-center gap-6">
+    <div className="absolute top-0 right-0 m-4 inline-flex justify-end items-center gap-6">
+      <div className="w-8 h-8 relative overflow-hidden">
+        <div className="w-5 h-7 left-[5.50px] top-[2.25px] absolute bg-gray-700" />
+      </div>
+      <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />
+      <div className="justify-start text-sky-500 text-base font-normal font-['Poppins']">{user.first_name}</div>
+      <div className="justify-start text-sky-500 text-base font-normal font-['Poppins']">{user.last_name}</div>
+    </div>
+  
+  </div>
+
       {/* Search Bar */}
+      <div className="w-32 h-8 relative">
+       
+      </div>
       <div className="mb-6">
         <div className="flex items-center bg-white shadow-sm rounded-lg px-4 py-2">
           <Search className="text-gray-400" size={20} />
@@ -359,6 +386,7 @@ const Dashboard = () => {
           />
         </>
       )}
+
     </div>
   );
 };

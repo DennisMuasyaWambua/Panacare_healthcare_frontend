@@ -111,6 +111,7 @@ const Sidebar = () => {
                 </li>
               );
             })}
+
           </ul>
           
           {/* Logout button */}
