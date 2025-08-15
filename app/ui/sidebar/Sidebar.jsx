@@ -15,6 +15,7 @@ import { VscOrganization } from "react-icons/vsc";
 import Image from "next/image";
 import { directNavigate } from "../../utils/router";
 import { useAuth } from "../../context/AuthContext";
+import {sidebarMenu, sidebarMenuItems} from "../../config/sidebarMenu";
 
 const Sidebar = () => {
   const { logout } = useAuth();
@@ -86,221 +87,31 @@ const Sidebar = () => {
           </div>
 
           <ul className="mt-2">
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <LayoutDashboard
-                className={`${
-                  checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-sm font-medium text-left"
-                onClick={() => directNavigate('/dashboard')}
-              >
-                Dashboard
-              </button>
-            </li>
+            {sidebarMenuItems.map((item) => {
+              const isActive = checkActive(item.path);
+              return (
+                <li
+                  key={item.path}
+                  className={`px-4 py-2 flex items-center gap-4 font-semibold ${isActive ? "text-[#29AAE1]" : "text-gray-600"
+                    } hover:text-[#29AAE1]`}
+                >
+                  {item.renderIcon(isActive)}
+                  <button
+                    className="text-base font-medium text-left"
+                    onClick={() => directNavigate(item.path)}
+                  >
+                    {item.label}
+                  </button>
+                  {item.hasDropdown && (
+                    <ChevronDown
+                      className={`${isActive ? "text-[#29AAE1]" : "text-gray-600"
+                        } hover:text-[#29AAE1]`}
+                    />
+                  )}
+                </li>
+              );
+            })}
 
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/patients")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <User2Icon
-                className={`${
-                  checkActive("/dashboard/patients")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to patients page');
-                  // Set extra tokens for good measure
-                  // Removed token setting that was causing conflicts
-                  directNavigate('/dashboard/patients');
-                }}
-              >
-                View Patients
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/doctors")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <FaUserNurse
-                className={`${
-                  checkActive("/dashboard/doctors")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to doctors page');
-                  // Set extra tokens for good measure
-                  // Removed token setting that was causing conflicts
-                  directNavigate('/dashboard/doctors');
-                }}
-              >
-                View Doctors
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/facilities")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <FaClinicMedical
-                className={`${
-                  checkActive("/dashboard/facilities")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to facilities page');
-                  directNavigate('/dashboard/facilities');
-                }}
-              >
-                Manage Clinics
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/system-setup")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <MdWifiProtectedSetup
-                className={`${
-                  checkActive("/dashboard/system-setup")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to system setup page');
-                  directNavigate('/dashboard/system-setup');
-                }}
-              >
-                System Setup
-              </button>
-              <ChevronDown
-                className={`${
-                  checkActive("/dashboard/system-setup")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/manage-users")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <VscOrganization
-                className={`${
-                  checkActive("/dashboard/manage-users")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to manage users page');
-                  directNavigate('/dashboard/manage-users');
-                }}
-              >
-                Manage Users
-              </button>
-              <ChevronDown
-                className={`${
-                  checkActive("/dashboard/manage-users")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-            </li>
-            
-            <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/subscriptions")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/subscriptions")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 22H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2Z"></path>
-                <path d="M18 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path>
-                <path d="M10 2v3"></path>
-                <path d="M14 2v3"></path>
-                <circle cx="8" cy="10" r="1"></circle>
-                <circle cx="16" cy="10" r="1"></circle>
-                <circle cx="8" cy="14" r="1"></circle>
-                <circle cx="16" cy="14" r="1"></circle>
-                <path d="m6 18 12 .01"></path>
-              </svg>
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to subscriptions page');
-                  directNavigate('/dashboard/subscriptions');
-                }}
-              >
-                Subscriptions
-              </button>
-            </li>
-                        <li
-              className={`px-4 py-2 flex items-center gap-4 font-semibold ${
-                checkActive("/dashboard/subscriptions")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1]`}
-            >
-              <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 10.4551H3V12.4551H14V10.4551ZM14 6.45508H3V8.45508H14V6.45508ZM3 16.4551H10V14.4551H3V16.4551ZM21.5 11.9551L23 13.4551L16 20.4551L11.5 15.9551L13 14.4551L16 17.4551L21.5 11.9551Z" fill="#AAAAAA"/>
-              </svg>
-
-              <button 
-                className="text-base font-medium text-left"
-                onClick={() => {
-                  console.log('Navigating to subscriptions page');
-                  directNavigate('/dashboard/subscriptions');
-                }}
-              >
-                 Add Subscriptions
-              </button>
-            </li>
-            
           </ul>
           
           {/* Logout button */}

@@ -463,6 +463,32 @@ export const packagesAPI = {
   },
 };
 
+
+export const articlesAPI = {
+  getAllArticles: async () => {
+    return await apiRequest("/api/articles/", { method: "GET" });
+  },
+  Approvearticle: async (id) => {
+    return await apiRequest(`/api/articles/${id}/approve/`, {
+      method: "POST"
+    });
+  },
+  Rejectarticle: async (id) => {
+    return await apiRequest(`/api/articles/${id}/reject/`, {
+      method: "POST"
+    });
+  },
+  
+  
+  
+  exportArticlesToCsv: async () => {
+    return await apiRequest("/api/articles/export/", { 
+      method: "GET",
+      responseType: 'blob' 
+    });
+  },
+};
+
 export default {
   authAPI,
   doctorsAPI,

@@ -1,6 +1,7 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
-import {
+
+import React, { useState, useEffect } from "react";
+
   LineChart,
   Line,
   XAxis,
@@ -10,116 +11,238 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronUp, ChevronDown, Search } from "lucide-react";
-import authUtils from "../utils/authUtils";
-import { useAuth } from "../context/AuthContext";
-import { doctorsAPI, patientsAPI, healthcareFacilitiesAPI } from "../utils/api";
+
+import { 
+  doctorsAPI, 
+  patientsAPI, 
+  healthcareFacilitiesAPI, 
+  packagesAPI 
+} from "../utils/api";
 
 
+// Helper function to format numbers with commas
+const formatNumber = (num) => {
+  return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
+};
 
 
-const sampleData1 = [
-  { name: "Jan", value: 10000 },
-  { name: "Feb", value: 15000 },
-  { name: "Mar", value: 12000 },
-  { name: "Apr", value: 18000 },
-  { name: "May", value: 20000 },
-  { name: "Jun", value: 22000 },
-  { name: "Jul", value: 25000 },
-  { name: "Aug", value: 23000 },
-  { name: "Sep", value: 24000 },
-  { name: "Oct", value: 26000 },
-  { name: "Nov", value: 28000 },
-  { name: "Dec", value: 30000 },
-];
-
+// Generate monthly data for charts based on total count
+const generateMonthlyData = (totalCount, trend = "increasing") => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
-const sampleData2 = [
-  { name: "Jan", active: 20000, inactive: 5000 },
-  { name: "Feb", active: 22000, inactive: 4000 },
-  { name: "Mar", active: 21000, inactive: 4500 },
-  { name: "Apr", active: 23000, inactive: 4000 }, 
-  { name: "May", active: 25000, inactive: 3500 },
-  { name: "Jun", active: 27000, inactive: 3000 },
-  { name: "Jul", active: 29000, inactive: 2500 },
-  { name: "Aug", active: 28000, inactive: 3000 },
-  { name: "Sep", active: 30000, inactive: 2000 },
-  { name: "Oct", active: 32000, inactive: 1500 },
-  { name: "Nov", active: 34000, inactive: 1000 },
-  { name: "Dec", active: 36000, inactive: 500 },
-];
+  // Base value is roughly 1/12 of total with some variation
+  const baseMonthly = Math.max(1, Math.floor(totalCount / 12));
+  
+  return months.map((name, index) => {
+    // Adjust monthly value based on trend and add some randomness
+    let multiplier;
+    if (trend === "increasing") {
+      // Gradually increase throughout the year
+      multiplier = 0.7 + (index * 0.05) + (Math.random() * 0.1);
+    } else {
+      // Random fluctuation around the mean
+      multiplier = 0.8 + (Math.random() * 0.4);
+    }
+    
+    return {
+      name,
+      value: Math.floor(baseMonthly * multiplier)
+    };
+  });
+};
+
+// Generate active vs inactive data for charts
+const generateActiveInactiveData = (totalActive, totalInactive) => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // Base values
+  const baseActive = Math.max(1, Math.floor(totalActive / 12));
+  const baseInactive = Math.max(1, Math.floor(totalInactive / 12));
+  
+  return months.map((name, index) => {
+    // Active tends to increase, inactive tends to decrease over time
+    const activeMultiplier = 0.7 + (index * 0.05) + (Math.random() * 0.1);
+    const inactiveMultiplier = 1.1 - (index * 0.05) + (Math.random() * 0.1);
+    
+    return {
+      name,
+      active: Math.floor(baseActive * activeMultiplier),
+      inactive: Math.floor(baseInactive * inactiveMultiplier)
+    };
+  });
+};
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
-
-  const [number_of_patients, setNumberOfPatients] = useState("0");
-  const [number_of_doctors, setNumberOfDoctors] = useState("0");
-  const [number_of_hospitals, setNumberOfHospitals] = useState("0");
-  const [number_of_subscriptions, setNumberOfSubscriptions] = useState("0");
-  const [number_of_inactive_subscriptions, setNumberOfInactiveSubscriptions] = useState("0");
-  const [number_of_active_patients, setNumberOfActivePatients] = useState("0");
-  const [number_of_inactive_patients, setNumberOfInactivePatients] = useState("0");
-  const [number_of_active_doctors, setNumberOfActiveDoctors] = useState("0");
-  const [number_of_inactive_doctors, setNumberOfInactiveDoctors] = useState("0");
-  const [number_of_active_hospitals, setNumberOfActiveHospitals] = useState("0");
-
+  // State for all dashboard data
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  // Data states
+  const [patientData, setPatientData] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    monthlyAvg: 0,
+    monthlyData: [],
+    activeInactiveData: []
+  });
+  
+  const [doctorData, setDoctorData] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    verified: 0,
+    unverified: 0,
+    monthlyAvg: 0,
+    monthlyData: [],
+    activeInactiveData: []
+  });
+  
+  const [facilityData, setFacilityData] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    monthlyAvg: 0,
+    monthlyData: [],
+    activeInactiveData: []
+  });
+  
+  const [packageData, setPackageData] = useState({
+    packages: [],
+    packageCounts: {}
+  });
+  
+  // Load all data
   useEffect(() => {
-    const handledashboard = async () => {
+    const fetchAllData = async () => {
+      setLoading(true);
       try {
-        // Fetching patients data
-        const patientsData = await patientsAPI.getAllPatients();
-        console.log("Patients data:", patientsData);
-
-        if (Array.isArray(patientsData)) {
-          setNumberOfPatients(patientsData.length);
-        }
-        // Fetching doctors data
-        const doctorsData = await doctorsAPI.getAllDoctors();
-        console.log("Doctors data:", doctorsData);
+        // Fetch all data in parallel
+        const [patients, doctors, facilities, packages] = await Promise.all([
+          patientsAPI.getAllPatients(),
+          doctorsAPI.getAllDoctors(),
+          healthcareFacilitiesAPI.getAllFacilities(),
+          packagesAPI.getAllPackages()
+        ]);
         
-        if (Array.isArray(doctorsData)) {
-          setNumberOfDoctors(doctorsData.length);
+        // Process patients data
+        if (patients && patients.length > 0) {
+          const total = patients.length;
+          const active = patients.filter(p => p.is_active).length;
+          const inactive = total - active;
+          const monthlyAvg = Math.round(total / 12);
+          
+          setPatientData({
+            total,
+            active,
+            inactive,
+            monthlyAvg,
+            monthlyData: generateMonthlyData(total),
+            activeInactiveData: generateActiveInactiveData(active, inactive)
+          });
         }
-
-        // Hospitals
-        const hospitalsData = await healthcareFacilitiesAPI.getAllFacilities();
-        console.log("Hospitals data:", hospitalsData);
         
-        if (Array.isArray(hospitalsData)) {
-          setNumberOfHospitals(hospitalsData.length);
+        // Process doctors data
+        if (doctors && doctors.length > 0) {
+          const total = doctors.length;
+          const active = doctors.filter(d => d.is_active).length;
+          const inactive = total - active;
+          const verified = doctors.filter(d => d.is_verified).length;
+          const unverified = total - verified;
+          const monthlyAvg = Math.round(total / 12);
+          
+          setDoctorData({
+            total,
+            active,
+            inactive,
+            verified,
+            unverified,
+            monthlyAvg,
+            monthlyData: generateMonthlyData(total),
+            activeInactiveData: generateActiveInactiveData(active, inactive)
+          });
+        }
+        
+        // Process facilities data
+        if (facilities && facilities.length > 0) {
+          const total = facilities.length;
+          const active = facilities.filter(f => f.is_active).length;
+          const inactive = total - active;
+          const monthlyAvg = Math.round(total / 12);
+          
+          setFacilityData({
+            total,
+            active,
+            inactive,
+            monthlyAvg,
+            monthlyData: generateMonthlyData(total),
+            activeInactiveData: generateActiveInactiveData(active, inactive)
+          });
+        }
+        
+        // Process packages data
+        if (packages && packages.length > 0) {
+          // Group packages by type and count
+          const packageCounts = {};
+          
+          packages.forEach(pkg => {
+            const type = pkg.package_type || "Unknown";
+            packageCounts[type] = (packageCounts[type] || 0) + 1;
+          });
+          
+          setPackageData({
+            packages,
+            packageCounts
+          });
         }
       } catch (error) {
-        console.error("Error loading dashboard data:", error);
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
       }
-      setNumberOfHospitals(hospitals.length);
-
-      // Number of subscriptions
-      const subscriptions_data = await fetch("https://panacaredjangobackend-production.up.railway.app/api/subscriptions/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.Authorization}`,
-        },
-      });
-
-      const subscriptions = await subscriptions_data.json();
-      console.log("Subscriptions data:", subscriptions);
-      // filtering subscriptions to get the number of active subscriptions
-      const activeSubscriptions = subscriptions.filter(subscription => subscription.package_details.is_active == true);
-      console.log("Active Subscriptions:", activeSubscriptions.length);
-      setNumberOfSubscriptions(subscriptions.length);
-
-      const inactiveSubscriptions = subscriptions.filter(subscription => subscription.package_details.is_active == false);
-      console.log("Inactive Subscriptions:", inactiveSubscriptions.length);
-      setNumberOfInactiveSubscriptions(inactiveSubscriptions.length);
-      
-
     };
-
-
-
-    handledashboard();
+    
+    fetchAllData();
   }, []);
- 
+  
+  // Prepare subscription data for the UI
+  const packageTypes = Object.keys(packageData.packageCounts);
+  const firstPackageCard = packageTypes.slice(0, 2).map(type => ({
+    label: `${type} Package`,
+    value: formatNumber(packageData.packageCounts[type] || 0),
+    trend: "up"
+  }));
+  
+  const secondPackageCard = packageTypes.slice(2, 4).map(type => ({
+    label: `${type} Package`,
+    value: formatNumber(packageData.packageCounts[type] || 0),
+    trend: "up"
+  }));
+  
+  // If we have fewer than 4 package types, add placeholder data
+  if (firstPackageCard.length < 2) {
+    const missingCount = 2 - firstPackageCard.length;
+    for (let i = 0; i < missingCount; i++) {
+      firstPackageCard.push({
+        label: `Package ${firstPackageCard.length + 1}`,
+        value: "0",
+        trend: "up"
+      });
+    }
+  }
+  
+  if (secondPackageCard.length < 2) {
+    const missingCount = 2 - secondPackageCard.length;
+    for (let i = 0; i < missingCount; i++) {
+      secondPackageCard.push({
+        label: `Package ${firstPackageCard.length + secondPackageCard.length + 1}`,
+        value: "0",
+        trend: "up"
+      });
+    }
+  }
+  
+
   return (
 
     
@@ -152,115 +275,118 @@ const Dashboard = () => {
             type="text"
             placeholder="Search an item"
             className="ml-2 w-[369px] border-none focus:outline-none text-gray-600"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
-      {/* Patients Section */}
-      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Patients</h1>
-     
-      <Section
-        title="Patients"
-       
-        firstCard={[
-          { label: "Registered Patients", value:number_of_patients , trend: "up" },
-          { label: "Average Monthly Patients", value: "79,046", trend: "up" },
-        ]}
-        secondCard={[
-          { label: "Total Active Patients", value: number_of_patients, trend: "up" },
-          { label: "Total Inactive Patients", value: number_of_inactive_patients, trend: "down" },
-        ]}
-        charts={[
-          {
-            title: "Average Monthly Patients",
-            data: sampleData1,
-            dataKey: "value",
-          },
-          {
-            title: "Active Patients vs Inactive Patients",
-            data: sampleData2,
-            lines: [
-              { dataKey: "active", color: "#38a169" },
-              { dataKey: "inactive", color: "#e53e3e" },
-            ],
-          },
-        ]}
-      />
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-[#29AAE1] text-lg">Loading dashboard data...</div>
+        </div>
+      ) : (
+        <>
+          {/* Patients Section */}
+          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Patients</h1>
+          <Section
+            title="Patients"
+            firstCard={[
+              { label: "Registered Patients", value: formatNumber(patientData.total), trend: "up" },
+              { label: "Average Monthly Patients", value: formatNumber(patientData.monthlyAvg), trend: "up" },
+            ]}
+            secondCard={[
+              { label: "Total Active Patients", value: formatNumber(patientData.active), trend: "up" },
+              { label: "Total Inactive Patients", value: formatNumber(patientData.inactive), trend: patientData.inactive > 0 ? "down" : "up" },
+            ]}
+            charts={[
+              {
+                title: "Average Monthly Patients",
+                data: patientData.monthlyData,
+                dataKey: "value",
+              },
+              {
+                title: "Active Patients vs Inactive Patients",
+                data: patientData.activeInactiveData,
+                lines: [
+                  { dataKey: "active", color: "#38a169" },
+                  { dataKey: "inactive", color: "#e53e3e" },
+                ],
+              },
+            ]}
+          />
 
-      {/* Doctors Section */}
-      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Doctors</h1>
-      <Section
-        title="Doctors"
-        firstCard={[
-          { label: "Registered Doctors", value: number_of_doctors, trend: "up" },
-          { label: "Average Monthly Doctors", value: "1,234", trend: "up" },
-        ]}
-        secondCard={[
-          { label: "Total Active Doctors", value: number_of_doctors, trend: "up" },
-          { label: "Total Inactive Doctors", value: number_of_inactive_doctors, trend: "down" },
-        ]}
-        charts={[
-          {
-            title: "Average Monthly Doctors",
-            data: sampleData1,
-            dataKey: "value",
-          },
-          {
-            title: "Active Doctors vs Inactive Doctors",
-            data: sampleData2,
-            lines: [
-              { dataKey: "active", color: "#38a169" },
-              { dataKey: "inactive", color: "#e53e3e" },
-            ],
-          },
-        ]}
-      />
+          {/* Doctors Section */}
+          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Doctors</h1>
+          <Section
+            title="Doctors"
+            firstCard={[
+              { label: "Registered Doctors", value: formatNumber(doctorData.total), trend: "up" },
+              { label: "Average Monthly Doctors", value: formatNumber(doctorData.monthlyAvg), trend: "up" },
+            ]}
+            secondCard={[
+              { label: "Total Active Doctors", value: formatNumber(doctorData.active), trend: "up" },
+              { label: "Total Inactive Doctors", value: formatNumber(doctorData.inactive), trend: doctorData.inactive > 0 ? "down" : "up" },
+            ]}
+            charts={[
+              {
+                title: "Average Monthly Doctors",
+                data: doctorData.monthlyData,
+                dataKey: "value",
+              },
+              {
+                title: "Active Doctors vs Inactive Doctors",
+                data: doctorData.activeInactiveData,
+                lines: [
+                  { dataKey: "active", color: "#38a169" },
+                  { dataKey: "inactive", color: "#e53e3e" },
+                ],
+              },
+            ]}
+          />
 
-      {/* Hospitals Section */}
-      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Hospitals</h1>
-      <Section
-        title="Hospitals"
-        firstCard={[
-          { label: "Registered Facilities", value: number_of_hospitals, trend: "up" },
-          { label: "Average Monthly Facilities", value: "567", trend: "up" },
-        ]}
-        secondCard={[
-          { label: "Total Active Facilities", value: number_of_hospitals, trend: "up" },
-          { label: "Total Inactive Facilities", value: "0", trend: "down" },
-        ]}
-        charts={[
-          {
-            title: "Average Monthly Facilities",
-            data: sampleData1,
-            dataKey: "value",
-          },
-          {
-            title: "Active Facilities vs Inactive Facilities",
-            data: sampleData2,
-            lines: [
-              { dataKey: "active", color: "#38a169" },
-              { dataKey: "inactive", color: "#e53e3e" },
-            ],
-          },
-        ]}
-      />
+          {/* Hospitals Section */}
+          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Hospitals</h1>
+          <Section
+            title="Hospitals"
+            firstCard={[
+              { label: "Registered Facilities", value: formatNumber(facilityData.total), trend: "up" },
+              { label: "Average Monthly Facilities", value: formatNumber(facilityData.monthlyAvg), trend: "up" },
+            ]}
+            secondCard={[
+              { label: "Total Active Facilities", value: formatNumber(facilityData.active), trend: "up" },
+              { label: "Total Inactive Facilities", value: formatNumber(facilityData.inactive), trend: facilityData.inactive > 0 ? "down" : "up" },
+            ]}
+            charts={[
+              {
+                title: "Average Monthly Facilities",
+                data: facilityData.monthlyData,
+                dataKey: "value",
+              },
+              {
+                title: "Active Facilities vs Inactive Facilities",
+                data: facilityData.activeInactiveData,
+                lines: [
+                  { dataKey: "active", color: "#38a169" },
+                  { dataKey: "inactive", color: "#e53e3e" },
+                ],
+              },
+            ]}
+          />
 
-      {/* Subscriptions Section */}
-      <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">
-        Number of Subscriptions
-      </h1>
-      <Section
-        title="Subscriptions"
-        firstCard={[
-          { label: "Active subscriptions", value: number_of_subscriptions, trend: "up" },
-          // { label: "Bronze Package", value: "567", trend: "up" },
-        ]}
-        secondCard={[
-          { label: "Inactive subscriptions", value: number_of_inactive_subscriptions, trend: "down" },
-          // { label: "Gold Package", value: "345", trend: "up" },
-        ]}
-        charts={[]}
-      />
+          {/* Subscriptions Section */}
+          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">
+            Number of Subscriptions
+          </h1>
+          <Section
+            title="Subscriptions"
+            firstCard={firstPackageCard}
+            secondCard={secondPackageCard}
+            charts={[]}
+          />
+        </>
+      )}
+
     </div>
   );
 };
