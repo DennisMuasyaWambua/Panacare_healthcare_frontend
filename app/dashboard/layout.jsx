@@ -7,10 +7,12 @@ import PropTypes from 'prop-types';
 const Layout = ({ children }) => {
   return (
     <ProtectedRoute>
+
       <div className="flex h-screen bg-gray-50">
         <Sidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Navbar />
+
           <div className="flex-1 overflow-auto">{children}</div>
         </div>
       </div>

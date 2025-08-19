@@ -90,235 +90,34 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <ul className="mt-3">
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <LayoutDashboard size={20}
-                className={`${
-                  checkActive("/dashboard") ? "text-[#29AAE1]" : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-sm text-left"
-                onClick={() => directNavigate('/dashboard')}
-              >
-                Dashboard
-              </button>
-            </li>
 
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/patients")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <User2Icon size={20}
-                className={`${
-                  checkActive("/dashboard/patients")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to patients page');
-                  directNavigate('/dashboard/patients');
-                }}
-              >
-                Patients
-              </button>
-            </li>
+          <ul className="mt-2">
+            {sidebarMenuItems.map((item) => {
+              const isActive = checkActive(item.path);
+              return (
+                <li
+                  key={item.path}
+                  className={`px-4 py-2 flex items-center gap-4 font-semibold ${isActive ? "text-[#29AAE1]" : "text-gray-600"
+                    } hover:text-[#29AAE1]`}
+                >
+                  {item.renderIcon(isActive)}
+                  <button
+                    className="text-base font-medium text-left"
+                    onClick={() => directNavigate(item.path)}
+                  >
+                    {item.label}
+                  </button>
+                  {item.hasDropdown && (
+                    <ChevronDown
+                      className={`${isActive ? "text-[#29AAE1]" : "text-gray-600"
+                        } hover:text-[#29AAE1]`}
+                    />
+                  )}
+                </li>
+              );
+            })}
 
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/doctors")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <FaUserNurse size={20}
-                className={`${
-                  checkActive("/dashboard/doctors")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to doctors page');
-                  directNavigate('/dashboard/doctors');
-                }}
-              >
-                Doctors
-              </button>
-            </li>
 
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/facilities")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <FaClinicMedical size={20}
-                className={`${
-                  checkActive("/dashboard/facilities")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`}
-              />
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to facilities page');
-                  directNavigate('/dashboard/facilities');
-                }}
-              >
-                Hospital
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/appointments")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/appointments")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8 2v4"></path><path d="M16 2v4"></path><path d="M3 10h18"></path><rect width="18" height="14" x="3" y="6" rx="2"></rect>
-              </svg>
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to appointments page');
-                  directNavigate('/dashboard/appointments');
-                }}
-              >
-                Appointments
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/teleconsulatation")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/teleconsulatation")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 10v5"></path><path d="M9 10v5"></path><path d="M12 10v5"></path>
-                <circle cx="12" cy="4" r="2"></circle><path d="M10 2h4"></path>
-                <path d="M5 18c-.333 1.167-1 2.5-2 3"></path><path d="M19 18c.333 1.167 1 2.5 2 3"></path>
-                <path d="M12 18a4 4 0 0 0 4-4v-3a6 6 0 0 0-3-5.2"></path>
-                <path d="M12 18a4 4 0 0 1-4-4v-3a6 6 0 0 1 3-5.2"></path>
-              </svg>
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to teleconsultation page');
-                  directNavigate('/dashboard/teleconsulatation');
-                }}
-              >
-                Teleconsultation tag
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/followup")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/followup")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"></path>
-                <polyline points="13 3 13 9 19 9"></polyline>
-              </svg>
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to follow-up page');
-                  directNavigate('/dashboard/followup');
-                }}
-              >
-                Follow-Up Compliance Monitor
-              </button>
-            </li>
-            
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/subscriptions")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/subscriptions")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 22H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2Z"></path>
-                <path d="M18 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"></path>
-                <circle cx="8" cy="10" r="1"></circle>
-                <circle cx="16" cy="10" r="1"></circle>
-                <circle cx="8" cy="14" r="1"></circle>
-                <circle cx="16" cy="14" r="1"></circle>
-              </svg>
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to subscriptions page');
-                  directNavigate('/dashboard/subscriptions');
-                }}
-              >
-                Subscriptions
-              </button>
-            </li>
-
-            <li
-              className={`px-4 py-2 flex items-center gap-3 ${
-                checkActive("/dashboard/package")
-                  ? "text-[#29AAE1]"
-                  : "text-gray-600"
-              } hover:text-[#29AAE1] hover:bg-gray-50`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className={`w-5 h-5 ${
-                  checkActive("/dashboard/package")
-                    ? "text-[#29AAE1]"
-                    : "text-gray-600"
-                } hover:text-[#29AAE1]`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                <line x1="2" x2="22" y1="10" y2="10"></line>
-              </svg>
-              <button 
-                className="text-sm text-left"
-                onClick={() => {
-                  console.log('Navigating to package payment tracker page');
-                  directNavigate('/dashboard/package');
-                }}
-              >
-                Package Payment Tracker
-              </button>
-            </li>
           </ul>
           
           {/* Logout button */}
