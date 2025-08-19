@@ -15,8 +15,8 @@ const Navbar = () => {
     <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       {/* Left Section */}
       <div>
-        <h1 className="text-lg font-medium text-[#29AAE1]">Dashboard</h1>
-        <p className="text-sm text-gray-600">Welcome Back, <span className="text-[#29AAE1]">Admin</span></p>
+        <h1 className="text-lg font-medium text-[#7F375E]">Dashboard</h1>
+        <p className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">👋🏾 Welcome Back, <span className="text-[#29AAE1]">{user ? `${user.first_name} ${user.last_name}` : 'User'}</span></p>
       </div>
 
       {/* Right Section */}
@@ -31,10 +31,14 @@ const Navbar = () => {
             <User className="w-5 h-5 text-gray-600" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-[#5f6062]">
               {user ? `${user.first_name} ${user.last_name}` : 'User'}
             </span>
-            <span className="text-xs text-gray-500">Admin</span>
+              <span className="text-xs text-gray-500">
+              {user
+                ? user.roles.find((role) => role?.name === "admin")?.name || ""
+                : ""}
+              </span>
           </div>
         </div>
         <button 
