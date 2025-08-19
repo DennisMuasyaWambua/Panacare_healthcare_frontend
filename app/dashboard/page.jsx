@@ -11,6 +11,7 @@ import {LineChart,
   ResponsiveContainer,
 } from "recharts";
 import { ChevronUp, ChevronDown, Search } from "lucide-react";
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 
 import { 
   doctorsAPI, 
@@ -84,7 +85,7 @@ const Dashboard = () => {
   // State for all dashboard data
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const {user} = useAuth();
   // Data states
   const [patientData, setPatientData] = useState({
     total: 0,
