@@ -30,6 +30,9 @@ const formatNumber = (num) => {
 const generateMonthlyData = (totalCount, trend = "increasing") => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
+  // Current month for highlighting in charts (September in the design)
+  const currentMonth = "Sep"; 
+  
   // Base value is roughly 1/12 of total with some variation
   const baseMonthly = Math.max(1, Math.floor(totalCount / 12));
   
@@ -46,7 +49,8 @@ const generateMonthlyData = (totalCount, trend = "increasing") => {
     
     return {
       name,
-      value: Math.floor(baseMonthly * multiplier)
+      value: Math.floor(baseMonthly * multiplier),
+      isCurrent: name === currentMonth // Mark current month for reference line
     };
   });
 };
@@ -54,6 +58,9 @@ const generateMonthlyData = (totalCount, trend = "increasing") => {
 // Generate active vs inactive data for charts
 const generateActiveInactiveData = (totalActive, totalInactive) => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // Current month for highlighting in charts (September in the design)
+  const currentMonth = "Sep";
   
   // Base values
   const baseActive = Math.max(1, Math.floor(totalActive / 12));
@@ -67,7 +74,8 @@ const generateActiveInactiveData = (totalActive, totalInactive) => {
     return {
       name,
       active: Math.floor(baseActive * activeMultiplier),
-      inactive: Math.floor(baseInactive * inactiveMultiplier)
+      inactive: Math.floor(baseInactive * inactiveMultiplier),
+      isCurrent: name === currentMonth // Mark current month for reference line
     };
   });
 };
@@ -245,8 +253,9 @@ const Dashboard = () => {
 
   return (
 
+
     
-    <div className="p-6 px-6 bg-gray-50 min-h-screen">
+    <div className="p-6 px-6 bg-gray-50 min-h-screen overflow-y-auto">
       <div className="w-32 h-8 relative">
   <div className="left-0 top-0 absolute justify-start text-fuchsia-900 text-xl font-normal font-['Poppins']">Dashboard</div></div>
   <div className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">👋🏾 Welcome Back,  {user ? `${user.first_name}` : 'User'} </div>
@@ -281,6 +290,8 @@ const Dashboard = () => {
         </div>
       </div>
 
+
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-[#29AAE1] text-lg">Loading dashboard data...</div>
@@ -288,7 +299,7 @@ const Dashboard = () => {
       ) : (
         <>
           {/* Patients Section */}
-          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Patients</h1>
+          <h1 className="text-xl font-medium text-gray-700 mb-4">Patients</h1>
           <Section
             title="Patients"
             firstCard={[
@@ -317,7 +328,7 @@ const Dashboard = () => {
           />
 
           {/* Doctors Section */}
-          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Doctors</h1>
+          <h1 className="text-xl font-medium text-gray-700 mb-4">Doctors</h1>
           <Section
             title="Doctors"
             firstCard={[
@@ -346,7 +357,7 @@ const Dashboard = () => {
           />
 
           {/* Hospitals Section */}
-          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">Hospitals</h1>
+          <h1 className="text-xl font-medium text-gray-700 mb-4">Hospitals</h1>
           <Section
             title="Hospitals"
             firstCard={[
@@ -375,15 +386,62 @@ const Dashboard = () => {
           />
 
           {/* Subscriptions Section */}
-          <h1 className="text-2xl font-bold text-[#29AAE1] mb-6">
+          <h1 className="text-xl font-medium text-gray-700 mb-4">
             Number of Subscriptions
           </h1>
-          <Section
-            title="Subscriptions"
-            firstCard={firstPackageCard}
-            secondCard={secondPackageCard}
-            charts={[]}
-          />
+          <div className="mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* First Card */}
+              <div className="bg-white shadow-sm rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <h2 className="text-gray-500 text-sm mb-2">{firstPackageCard[0]?.label || "Basic Package"}</h2>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-[#7F375E]">
+                        {firstPackageCard[0]?.value || "0"}
+                      </span>
+                      <ChevronUp className="ml-2 text-green-500" size={20} />
+                    </div>
+                  </div>
+                  <div className="w-[1px] h-16 bg-gray-300 mx-4"></div>
+                  <div className="flex-1">
+                    <h2 className="text-gray-500 text-sm mb-2">{secondPackageCard[0]?.label || "Silver Package"}</h2>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-[#7F375E]">
+                        {secondPackageCard[0]?.value || "0"}
+                      </span>
+                      <ChevronUp className="ml-2 text-green-500" size={20} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Second Card */}
+              <div className="bg-white shadow-sm rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="flex-1">
+                    <h2 className="text-gray-500 text-sm mb-2">{firstPackageCard[1]?.label || "Bronze Package"}</h2>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-[#7F375E]">
+                        {firstPackageCard[1]?.value || "0"}
+                      </span>
+                      <ChevronUp className="ml-2 text-green-500" size={20} />
+                    </div>
+                  </div>
+                  <div className="w-[1px] h-16 bg-gray-300 mx-4"></div>
+                  <div className="flex-1">
+                    <h2 className="text-gray-500 text-sm mb-2">{secondPackageCard[1]?.label || "Gold Package"}</h2>
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-[#7F375E]">
+                        {secondPackageCard[1]?.value || "0"}
+                      </span>
+                      <ChevronUp className="ml-2 text-green-500" size={20} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </>
       )}
 
@@ -392,7 +450,7 @@ const Dashboard = () => {
 };
 
 const Section = ({ title, firstCard, secondCard, charts }) => (
-  <div className="mb-12">
+  <div className="mb-14">
     {/* Statistics Cards */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       {/* First Combined Card */}
@@ -436,49 +494,110 @@ const Card = ({ items }) => (
           </div>
         </div>
         {index < items.length - 1 && (
-          <div className="w-[2px] h-full bg-[#707070] mx-4"></div>
+          <div className="w-[1px] h-16 bg-gray-300 mx-4"></div>
         )}
       </React.Fragment>
     ))}
   </div>
 );
 
-const Chart = ({ title, data, lines, dataKey }) => (
-  <div className="bg-white shadow-sm rounded-lg p-4">
-    <h2 className="text-[#7F375E] text-sm mb-4">{title}</h2>
-    <div className="h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
-          {lines ? (
-            lines.map((line, index) => (
-              <Line
-                key={index}
-                type="monotone"
-                dataKey={line.dataKey}
-                stroke={line.color}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 6 }}
-              />
-            ))
-          ) : (
-            <Line
-              type="monotone"
-              dataKey={dataKey}
-              stroke="#3182ce"
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 6 }}
+const Chart = ({ title, data, lines, dataKey }) => {
+  // Find the current month data point
+  const currentMonth = data.find(d => d.isCurrent);
+  let currentMonthIndex = -1;
+  
+  if (currentMonth) {
+    currentMonthIndex = data.findIndex(d => d.isCurrent);
+  }
+  
+  const currentMonth3Letter = "Sep"; // September used in the design
+  const currentYear = "2024"; // Current year from design
+  
+  return (
+    <div className="bg-white shadow-sm rounded-lg p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-gray-600 text-sm font-medium">{title}</h2>
+        <div className="flex items-center text-xs text-gray-500">
+          <div className="px-2 py-1 bg-gray-100 rounded-md">
+            {currentMonth3Letter}, {currentYear}
+          </div>
+        </div>
+      </div>
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 10 }} 
+              axisLine={false} 
+              tickLine={false} 
             />
-          )}
-        </LineChart>
-      </ResponsiveContainer>
+            <YAxis 
+              tick={{ fontSize: 10 }} 
+              axisLine={false} 
+              tickLine={false} 
+            />
+            <Tooltip 
+              contentStyle={{ 
+                borderRadius: '4px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)', 
+                border: 'none'
+              }}
+            />
+            {/* Reference Line for Current Month */}
+            {currentMonthIndex >= 0 && (
+              <svg>
+                <line
+                  x1={`${(currentMonthIndex / (data.length - 1)) * 100}%`}
+                  y1="0%"
+                  x2={`${(currentMonthIndex / (data.length - 1)) * 100}%`}
+                  y2="100%"
+                  stroke="#dddddd"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                />
+              </svg>
+            )}
+            {lines ? (
+              lines.map((line, index) => (
+                <Line
+                  key={index}
+                  type="monotone"
+                  dataKey={line.dataKey}
+                  stroke={line.color}
+                  strokeWidth={2}
+                  dot={{ r: 2, strokeWidth: 2, stroke: line.color, fill: 'white' }}
+                  activeDot={{ r: 5 }}
+                />
+              ))
+            ) : (
+              <Line
+                type="monotone"
+                dataKey={dataKey}
+                stroke="#29AAE1"
+                strokeWidth={2}
+                dot={{ r: 2, strokeWidth: 2, stroke: '#29AAE1', fill: 'white' }}
+                activeDot={{ r: 5 }}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      
+      {/* Legend for the chart */}
+      {lines && (
+        <div className="flex mt-2 text-xs">
+          {lines.map((line, index) => (
+            <div key={index} className="flex items-center mr-4">
+              <div className="w-3 h-3 rounded-full mr-1" style={{ backgroundColor: line.color }}></div>
+              <span className="text-gray-500 capitalize">{line.dataKey} {title.split(' ')[0]}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default Dashboard;

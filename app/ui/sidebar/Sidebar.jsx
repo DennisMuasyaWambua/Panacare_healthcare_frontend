@@ -57,19 +57,19 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div
         className={`
-          fixed md:static w-64 h-full bg-white shadow-md z-10 transition-transform
+          fixed md:static w-64 h-full bg-white border-r border-gray-200 z-10 transition-transform
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
           }
         `}
       >
         {/* Logo */}
-        <div className="px-4 py-3 border-b border-gray-700 w-3/4 mx-auto">
+        <div className="border-b border-gray-200 w-full px-4 py-4">
           <div className="flex items-center justify-center">
             <div className="text-blue-500 font-bold text-lg image-container">
               <Image
-                src={"/logo.jpg"}
-                width={154}
+                src={"/panacarelogo.png"}
+                width={120}
                 height={35}
                 alt="Panacare Logo"
               />
@@ -79,12 +79,17 @@ const Sidebar = () => {
 
         {/* Sidebar Menu */}
         <nav className="pt-4">
-          <div className="px-4 mb-2">
+          <div className="px-4 mb-3">
             <div className="flex items-center bg-gray-100 p-2 rounded-md">
               <Search size={18} className="text-gray-400" />
-              <span className="text-gray-400 ml-2 text-sm">Search menu</span>
+              <input 
+                type="text"
+                placeholder="Search an item" 
+                className="bg-transparent border-none focus:outline-none text-gray-600 text-sm ml-2 w-full"
+              />
             </div>
           </div>
+
 
           <ul className="mt-2">
             {sidebarMenuItems.map((item) => {
@@ -112,16 +117,17 @@ const Sidebar = () => {
               );
             })}
 
+
           </ul>
           
           {/* Logout button */}
-          <div className="mt-auto px-4 py-6 border-t border-gray-100">
+          <div className="mt-auto px-4 py-4 absolute bottom-0 w-full">
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-red-500 hover:text-red-700 w-full px-2 py-2 hover:bg-red-50 rounded"
             >
               <LogOut size={18} />
-              <span>Logout</span>
+              <span className="text-sm">Logout</span>
             </button>
           </div>
         </nav>

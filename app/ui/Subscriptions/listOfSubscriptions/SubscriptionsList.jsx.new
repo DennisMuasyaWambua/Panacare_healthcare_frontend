@@ -79,7 +79,7 @@ const SubscriptionsList = ({
               placeholder="Search by Name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border text-gray-700 border-gray-300 rounded-md focus:ring-[#29AAE1] focus:border-[#29AAE1] text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#29AAE1] focus:border-[#29AAE1] text-sm"
             />
           </div>
 
@@ -103,7 +103,7 @@ const SubscriptionsList = ({
             {/* More Filters Button */}
             <button
               onClick={() => setShowMoreFilters(!showMoreFilters)}
-              className="px-4 py-2 border text-gray-700 border-gray-300 rounded-md text-sm flex items-center gap-1 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm flex items-center gap-1 hover:bg-gray-50"
             >
               More Filters
               <ChevronDown className={`w-4 h-4 transition-transform ${showMoreFilters ? 'rotate-180' : ''}`} />
@@ -112,21 +112,21 @@ const SubscriptionsList = ({
             {/* Export Buttons */}
             <button
               onClick={onExportPdf}
-              className="px-4 py-2 border text-gray-700 border-gray-300 rounded-md text-sm hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
             >
               Export PDF
             </button>
             <button
               onClick={onExportCsv}
-              className="px-4 py-2 border text-gray-700 border-gray-300 rounded-md text-sm hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
             >
               Export CSV
             </button>
 
             {/* Edit Button (matches the design) */}
-            {/* <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
               <Pencil className="w-4 h-4 text-gray-600" />
-            </button> */}
+            </button>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ const SubscriptionsList = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="price-min" className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
-                <div className="flex items-center text-gray-700 space-x-2">
+                <div className="flex items-center space-x-2">
                   <input
                     id="price-min"
                     type="number"
@@ -158,14 +158,14 @@ const SubscriptionsList = ({
                   id="duration-days"
                   type="number"
                   placeholder="Enter days"
-                  className="w-full p-2 border text-gray-700 border-gray-300 rounded-md text-sm"
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
                 />
               </div>
               <div>
                 <label htmlFor="features-select" className="block text-sm font-medium text-gray-700 mb-1">Features</label>
                 <select 
                   id="features-select"
-                  className="w-full p-2 border text-gray-700 border-gray-300 rounded-md text-sm appearance-none"
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm appearance-none"
                 >
                   <option value="">Select Feature</option>
                   <option value="priority_support">Priority Support</option>

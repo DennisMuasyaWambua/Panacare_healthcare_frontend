@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Search, MoreVertical, X, AlertCircle, FileText, Download, Eye } from "lucide-react";
+import { 
+  Search, 
+  MoreVertical, 
+  X, 
+  AlertCircle, 
+  FileText, 
+  Download, 
+  ChevronDown
+} from "lucide-react";
 import { patientsAPI } from "../../../utils/api";
 import { toast } from "react-toastify";
 
@@ -15,6 +23,7 @@ const ListofPatients = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -59,9 +68,7 @@ const ListofPatients = () => {
     );
   };
 
-  const openModal = (patient) => {
-    setModalPatient(patient);
-  };
+  // Modal open handled via setModalPatient where needed; inline handlers used.
 
   const closeModal = () => {
     setModalPatient(null);
@@ -93,6 +100,56 @@ const ListofPatients = () => {
   const viewPatientDetails = (patientId) => {
     // Navigate to patient details page
     window.location.href = `/dashboard/patients/view/${patientId}`;
+  };
+
+  // Helper: consistent date display (e.g., 16 August 2023)
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return "N/A";
+      return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  // Export table to PDF (print-friendly) without new deps
+  const exportToPdf = () => {
+    try {
+      const tableEl = document.getElementById("patients-table-wrap");
+      if (!tableEl) {
+        toast.error("Table not found");
+        return;
+      }
+      const win = window.open("", "_blank");
+      if (!win) {
+        toast.error("Popup blocked. Allow popups to export PDF.");
+        return;
+      }
+      const styles = `
+        <style>
+          body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; padding: 16px; }
+          h1 { font-size: 18px; color: #7F375E; margin-bottom: 12px; }
+          table { width: 100%; border-collapse: collapse; }
+          thead th { font-size: 11px; text-transform: uppercase; color: #29AAE1; text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; }
+          tbody td { font-size: 12px; color: #374151; padding: 10px; border-bottom: 1px dashed #e5e7eb; }
+          .status { padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; display: inline-block; }
+          .active { background: #dcfce7; color: #166534; }
+          .inactive { background: #fee2e2; color: #991b1b; }
+        </style>
+      `;
+      win.document.write(`<!doctype html><html><head><title>Patients</title>${styles}</head><body>`);
+      win.document.write(`<h1>List of Patients</h1>`);
+      win.document.write(tableEl.innerHTML);
+      win.document.write(`</body></html>`);
+      win.document.close();
+      // Slight delay for rendering before print
+      setTimeout(() => win.print(), 250);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to export PDF");
+    }
   };
 
   const filteredPatients = (Array.isArray(patients) ? patients : []).filter((patient) => {
@@ -147,96 +204,68 @@ const ListofPatients = () => {
     );
   } else {
     contentToRender = (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded-lg border-gray-300"
-                />
+      <div id="patients-table-wrap" className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead>
+            <tr className="border-b border-gray-200">
+              <th className="w-10 px-4 py-3">
+                <input type="checkbox" className="w-4 h-4 rounded-md border-gray-300" />
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Contact
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Date of Birth
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Blood Type
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Doctor
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Status
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[#29AAE1] uppercase tracking-wider">
-                Actions
-              </th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Patient's Name</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Phone Number</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Email Address</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Package</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Date Joined</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Last Active</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Last Activity</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#29AAE1] tracking-wider uppercase">Status</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredPatients.map((patient) => (
-              <tr key={patient.id} className={selectedRows.includes(patient.id) ? "bg-[#29AAE140]" : ""}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(patient.id)}
-                    onChange={() => handleRowSelect(patient.id)}
-                    className="w-4 h-4 rounded-lg border-gray-300"
-                  />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-black">
-                        {patient.user && patient.user.first_name ? patient.user.first_name[0] : '?'}
-                      </span>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {patient.user ? `${patient.user.first_name} ${patient.user.last_name}` : 'Unknown'}
+          <tbody>
+            {filteredPatients.map((patient) => {
+              const fullName = patient.user ? `${patient.user.first_name || ""} ${patient.user.last_name || ""}`.trim() : "Full Name";
+              const phone = patient.user?.phone_number || "+254 700 000000";
+              const email = patient.user?.email || "Email Address";
+              const pkg = patient.package?.name || patient.subscription?.package_name || "—";
+              const dateJoined = formatDate(patient.user?.date_joined || patient.created_at);
+              const lastActive = formatDate(patient.last_active);
+              const lastActivity = patient.last_activity || "—";
+              const active = Boolean(patient.active ?? patient.is_active);
+              const initial = (patient.user?.first_name?.[0] || "?").toUpperCase();
+              return (
+                <tr key={patient.id} className="border-b border-dashed border-gray-200 hover:bg-gray-50/60">
+                  <td className="px-4 py-3 align-middle">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(patient.id)}
+                      onChange={() => handleRowSelect(patient.id)}
+                      className="w-4 h-4 rounded-md border-gray-300"
+                    />
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-[11px] font-semibold text-gray-700">{initial}</span>
                       </div>
+                      <button onClick={() => viewPatientDetails(patient.id)} className="text-sm text-gray-800 underline underline-offset-2 hover:text-[#29AAE1]">
+                        {fullName || "Full Name"}
+                      </button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{patient.user ? patient.user.email : 'No email'}</div>
-                  <div className="text-sm text-gray-500">{patient.user ? patient.user.phone_number : 'No phone'}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {patient.date_of_birth || "Not specified"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {patient.blood_type || "Unknown"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {patient.doctor_id || "Unassigned"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    patient.active ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                  }`}>
-                    {patient.active ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => viewPatientDetails(patient.id)}
-                    className="text-[#29AAE1] hover:text-blue-700"
-                  >
-                    <Eye size={20} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{phone}</td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{email}</td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{pkg}</td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{dateJoined}</td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{lastActive}</td>
+                  <td className="px-4 py-3 align-middle text-sm text-gray-600">{lastActivity}</td>
+                  <td className="px-4 py-3 align-middle">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                      {active ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -245,96 +274,125 @@ const ListofPatients = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen relative">
-      {/* Title and Export Button */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[#7F375E]">List of Patients</h1>
-        <button
-          onClick={exportToCsv}
-          disabled={isExporting}
-          className="flex items-center gap-2 px-4 py-2 bg-[#29AAE1] text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          <Download size={18} />
-          {isExporting ? 'Exporting...' : 'Export to CSV'}
-        </button>
-      </div>
+      {/* Title */}
+      <h1 className="text-xl font-semibold text-[#7F375E] mb-4">List of Patients</h1>
 
-      {/* Search and Filter Section */}
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Search by Name or Email */}
-        <div>
-          <label htmlFor="nameSearch" className="block text-black mb-2">Search by Name or Email</label>
-          <div className="relative">
-            <input
-              id="nameSearch"
-              type="text"
-              placeholder="Search by name or email"
-              value={searchQuery}
-              onChange={handleSearch}
-              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
-            />
-            <Search className="absolute right-3 top-3 text-gray-400" size={20} />
+      {/* Filters Toolbar */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
+          {/* Search by Name */}
+          <div className="lg:col-span-4">
+            <label htmlFor="nameSearch" className="block text-[12px] text-gray-600 mb-1">Search by Name</label>
+            <div className="relative">
+              <input
+                id="nameSearch"
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={handleSearch}
+                className="w-full px-3 py-2 bg-[#F7FAFC] border border-gray-200 rounded-md focus:outline-none text-gray-700"
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-400" size={18} />
+            </div>
           </div>
-        </div>
 
-        {/* Search by Doctor's ID */}
-        <div>
-          <label htmlFor="doctorIdSearch" className="block text-black mb-2">Search by Doctor's ID</label>
-          <div className="relative">
-            <input
-              id="doctorIdSearch"
-              type="text"
-              placeholder="Enter Doctor's ID"
-              value={doctorIdQuery}
-              onChange={handleDoctorIdSearch}
-              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
-            />
-            <Search className="absolute right-3 top-3 text-gray-400" size={20} />
+          {/* Search by Doctor's ID */}
+          <div className="lg:col-span-3">
+            <label htmlFor="doctorIdSearch" className="block text-[12px] text-gray-600 mb-1">Search by Doctor's ID</label>
+            <div className="relative">
+              <input
+                id="doctorIdSearch"
+                type="text"
+                placeholder="Enter Doctor's ID"
+                value={doctorIdQuery}
+                onChange={handleDoctorIdSearch}
+                className="w-full px-3 py-2 bg-[#F7FAFC] border border-gray-200 rounded-md focus:outline-none text-gray-700"
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-400" size={18} />
+            </div>
           </div>
-        </div>
 
-        {/* Filter by Blood Type */}
-        <div>
-          <label htmlFor="bloodTypeFilter" className="block text-black mb-2">Filter by Blood Type</label>
-          <div className="relative">
-            <select
-              id="bloodTypeFilter"
-              value={bloodTypeFilter}
-              onChange={handleBloodTypeFilter}
-              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
+          {/* Filter by Status */}
+          <div className="lg:col-span-3">
+            <label htmlFor="statusFilter" className="block text-[12px] text-gray-600 mb-1">Filter by Status</label>
+            <div className="relative">
+              <select
+                id="statusFilter"
+                value={statusFilter}
+                onChange={handleStatusFilter}
+                className="w-full appearance-none px-3 py-2 bg-[#F7FAFC] border border-gray-200 rounded-md focus:outline-none text-gray-700"
+              >
+                <option value="All">Active/Inactive</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-2.5 text-gray-400" size={18} />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="lg:col-span-2 flex justify-end gap-2">
+            <button
+              onClick={exportToPdf}
+              className="px-3 py-2 text-sm border text-gray-600 border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+              title="Export pdf"
             >
-              <option value="All">All Blood Types</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
-            </select>
+              <FileText size={16} />
+              Export pdf
+            </button>
+            <button
+              onClick={exportToCsv}
+              disabled={isExporting}
+              className="px-3 py-2 text-sm border text-gray-600 border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2 disabled:opacity-60"
+              title="Export csv"
+            >
+              <Download size={16} />
+              {isExporting ? 'Exporting…' : 'Export csv'}
+            </button>
           </div>
+
+          {/* More Filters */}
+          {/* <div className="lg:col-span-0 flex justify-end">
+            <button
+              onClick={() => setShowMoreFilters((s) => !s)}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+            >
+              <span>More Filters</span>
+              <MoreVertical size={16} className="text-gray-500" />
+            </button>
+          </div> */}
         </div>
 
-        {/* Filter by Status */}
-        <div>
-          <label htmlFor="statusFilter" className="block text-black mb-2">Filter by Status</label>
-          <div className="relative">
-            <select
-              id="statusFilter"
-              value={statusFilter}
-              onChange={handleStatusFilter}
-              className="w-full px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none"
-            >
-              <option value="All">All</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
+        {/* More Filters dropdown (keeps previous Blood Type filter) */}
+        {showMoreFilters && (
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label htmlFor="bloodTypeFilter" className="block text-[12px] text-gray-600 mb-1">Filter by Blood Type</label>
+                <select
+                  id="bloodTypeFilter"
+                  value={bloodTypeFilter}
+                  onChange={handleBloodTypeFilter}
+                  className="w-full px-3 py-2 bg-[#F7FAFC] border border-gray-200 rounded-md focus:outline-none text-gray-700"
+                >
+                  <option value="All">All Blood Types</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Data Table Section */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {contentToRender}
       </div>
 
