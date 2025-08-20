@@ -1,17 +1,14 @@
 "use client";
-import ListofPatients from '../../ui/Patients/listOfPatients/ListofPatients'
 import React, { useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext';
 import Blog from '../../ui/blog-management/blog';
 
 const PatientsScreenPage = () => {
-  const { isAuthenticated } = useAuth();
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('current_page', 'patients');
       localStorage.setItem('blog-management_page_loaded', 'true');
-      console.log('blog-management page mounted, auth token set');
     }
     
     return () => {

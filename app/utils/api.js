@@ -489,6 +489,12 @@ export const articlesAPI = {
   },
 };
 
+export const subscriptions = {
+  getAllSubs: async () => {
+    return await apiRequest("/api/subscriptions/", { method: "GET" });
+  },
+};
+
 export default {
   authAPI,
   doctorsAPI,
@@ -497,4 +503,5 @@ export default {
   assignmentAPI,
   appointmentsAPI,
   packagesAPI,
+  subscriptions
 };
