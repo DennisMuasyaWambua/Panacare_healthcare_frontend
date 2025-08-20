@@ -2,6 +2,7 @@
 import React from "react";
 import { User, LogOut, Bell } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -11,12 +12,36 @@ const Navbar = () => {
     logout();
   };
 
+  const pathname = usePathname();
+  const isDashboardIndex = pathname === "/dashboard";
+
+  const getPageName = () => {
+  const parts = pathname.split("/").filter(Boolean);
+  return parts.length > 1
+    ? parts[parts.length - 1]
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (l) => l.toUpperCase())
+    : "Dashboard";
+  };
+
+
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
       {/* Left Section */}
       <div>
+        {isDashboardIndex ? (
+      <>
         <h1 className="text-lg font-medium text-[#7F375E]">Dashboard</h1>
-        <p className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">👋🏾 Welcome Back, <span className="text-[#29AAE1]">{user ? `${user.first_name} ${user.last_name}` : 'User'}</span></p>
+        <p className="w-80 h-7 justify-start text-stone-900 text-lg font-bold font-['Poppins'] leading-normal">
+          👋🏾 Welcome Back,{" "}
+          <span className="text-[#29AAE1]">
+            {user ? `${user.first_name} ${user.last_name}` : "User"}
+          </span>
+        </p>
+      </>
+    ) : (
+      <h1 className="text-lg font-medium text-[#7F375E]">{getPageName()}</h1>
+    )}
       </div>
 
       {/* Right Section */}

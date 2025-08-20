@@ -135,7 +135,7 @@ export const sidebarMenuItems = [
     ),
   },
   {
-    path: "/dashboard/package",
+    path: "/dashboard/package-payment-tracker",
     label: "Package Payment Tracker",
     renderIcon: (isActive) => (
       <svg
