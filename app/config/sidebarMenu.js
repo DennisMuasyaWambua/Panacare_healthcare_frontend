@@ -2,6 +2,7 @@ import { LayoutDashboard, User2Icon } from "lucide-react";
 import { FaClinicMedical, FaUserNurse } from "react-icons/fa";
 import { MdWifiProtectedSetup } from "react-icons/md";
 import { VscOrganization } from "react-icons/vsc";
+import { AiOutlineAudit } from "react-icons/ai";
 import React from "react";
 
 export const sidebarMenuItems = [
@@ -158,6 +159,15 @@ export const sidebarMenuItems = [
     label: "Blog Management",
     renderIcon: (isActive) => (
       <VscOrganization
+        className={`${isActive ? "text-[#29AAE1]" : "text-gray-600"} hover:text-[#29AAE1]`}
+      />
+    ),
+  },
+  {
+    path: "/dashboard/audit-logs",
+    label: "Audit Logs",
+    renderIcon: (isActive) => (
+      <AiOutlineAudit
         className={`${isActive ? "text-[#29AAE1]" : "text-gray-600"} hover:text-[#29AAE1]`}
       />
     ),
