@@ -2,7 +2,28 @@
 import React from "react";
 import DataTable from "react-data-table-component";
 
-const CustomTable = ({ columns, data, isLoading, error }) => {
+interface CustomTableProps {
+  columns: any[];
+  data: any[];
+  isLoading?: boolean;
+  error?: string | null;
+
+  paginationServer?: boolean;
+  paginationTotalRows?: number;
+  onChangePage?: (page: number) => void;
+  onChangeRowsPerPage?: (newPageSize: number, page: number) => void;
+}
+
+const CustomTable: React.FC<CustomTableProps> = ({
+  columns,
+  data,
+  isLoading = false,
+  error = null,
+  paginationServer = false,
+  paginationTotalRows = 0,
+  onChangePage,
+  onChangeRowsPerPage,
+}) => {
   let content;
 
   if (isLoading) {
@@ -31,8 +52,12 @@ const CustomTable = ({ columns, data, isLoading, error }) => {
         data={data}
         highlightOnHover
         pointerOnHover
-        pagination
         dense
+        pagination
+        paginationServer={paginationServer}
+        paginationTotalRows={paginationTotalRows}
+        onChangePage={onChangePage}
+        onChangeRowsPerPage={onChangeRowsPerPage}
         customStyles={{
           headCells: {
             style: {
@@ -48,7 +73,11 @@ const CustomTable = ({ columns, data, isLoading, error }) => {
     );
   }
 
-  return <div className="bg-white shadow-sm rounded-lg overflow-hidden">{content}</div>;
+  return (
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+      {content}
+    </div>
+  );
 };
 
 export default CustomTable;
