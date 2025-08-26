@@ -3,7 +3,7 @@ import { FaClinicMedical, FaUserNurse } from "react-icons/fa";
 import { MdWifiProtectedSetup } from "react-icons/md";
 import { VscOrganization } from "react-icons/vsc";
 import { AiOutlineAudit } from "react-icons/ai";
-import React from "react";
+import { MdOutlineWarningAmber } from "react-icons/md";import React from "react";
 
 export const sidebarMenuItems = [
   {
@@ -152,6 +152,15 @@ export const sidebarMenuItems = [
         <rect width="20" height="14" x="2" y="5" rx="2"></rect>
         <line x1="2" x2="22" y1="10" y2="10"></line>
       </svg>
+    ),
+  },
+  {
+    path: "/dashboard/risk-segmentation",
+    label: "Risk Segmentation",
+    renderIcon: (isActive) => (
+      <MdOutlineWarningAmber
+        className={`${isActive ? "text-[#29AAE1]" : "text-gray-600"} hover:text-[#29AAE1]`}
+      />
     ),
   },
   {

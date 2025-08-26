@@ -2,6 +2,8 @@
 
 import authUtils from './authUtils';
 
+
+
 // API base URL
 const API_BASE_URL = "https://panacaredjangobackend-production.up.railway.app";
 
@@ -495,6 +497,20 @@ export const subscriptions = {
   },
 };
 
+
+export const packageTracker = {
+  getAllPackages: async (params) => {
+    return await apiRequest("/api/package-payment-tracker/subscriptions/", {
+      method: "GET",
+      params,
+    });
+  },
+
+  getAllPackageSummary: async () => {
+    return await apiRequest("/api/package-payment-tracker/dashboard/", { method: "GET" });
+  },
+};
+
 export default {
   authAPI,
   doctorsAPI,
@@ -503,5 +519,6 @@ export default {
   assignmentAPI,
   appointmentsAPI,
   packagesAPI,
-  subscriptions
+  subscriptions,
+  packageTracker
 };

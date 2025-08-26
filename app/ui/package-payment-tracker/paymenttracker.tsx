@@ -2,23 +2,69 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { AlertCircle, Download, MoreVertical } from "lucide-react";
 import CustomTable from "../../components/CustomTable";
-import { subscriptions } from "../../utils/api";
 import { toast } from "react-toastify";
+import { packageTracker } from "../../utils/api";
+
+interface PackageSummary {
+  total_active_subscribers?: number;
+  expiring_this_week?: number;
+  renewed_this_month?: number;
+  overdue_not_renewed?: number;
+}
+
+interface PaginationResponse<T> {
+  count: number;
+  total_pages: number;
+  current_page: number;
+  page_size: number;
+  has_next: boolean;
+  has_previous: boolean;
+  results: T[];
+}
+
+
+export interface GetAllPackagesParams {
+  package_type?: string;
+  status?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}
+
 
 const Paymenttracker = () => {
   const [packageFilter, setPackageFilter] = useState("Daraja");
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [openDropdown, setOpenDropdown] = useState(null);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [openDropdown, setOpenDropdown] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [packages, setPackages] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [packages, setPackages] = useState<any[]>([]);
+  const [pagination, setPagination] = useState<Omit<PaginationResponse<any>, "results"> | null>(null);
+  const [packagesSummary, setPackagesSummary] = useState<PackageSummary>({});
 
-  const fetchSubscriptions = async () => {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const fetchPackages = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await subscriptions.getAllSubs();
-      setPackages(data || []);
+
+      const data: PaginationResponse<any> = await packageTracker.getAllPackages({
+        package_type: packageFilter,
+        page,
+        page_size: pageSize,
+      });
+
+      setPackages(data?.results || []);
+      setPagination({
+        count: data?.count || 0,
+        total_pages: data?.total_pages || 1,
+        current_page: data?.current_page || 1,
+        page_size: data?.page_size || 10,
+        has_next: data?.has_next || false,
+        has_previous: data?.has_previous || false,
+      });
     } catch (err) {
       console.error("Error fetching subscriptions:", err);
       setError("Failed to fetch subscriptions. Please try again later.");
@@ -29,17 +75,37 @@ const Paymenttracker = () => {
     }
   };
 
+  const fetchPackagesSummary = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await packageTracker.getAllPackageSummary();
+      setPackagesSummary(data || {});
+    } catch (err) {
+      console.error("Error fetching package summary:", err);
+      setError("Failed to fetch package summary. Please try again later.");
+      toast.error("Failed to fetch package summary. Please try again later.");
+      setPackagesSummary({});
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchSubscriptions();
+    fetchPackages();
+  }, [packageFilter, page, pageSize]);
+
+  useEffect(() => {
+    fetchPackagesSummary();
   }, []);
 
-  const handleRowSelect = (id) => {
+  const handleRowSelect = (id: number) => {
     setSelectedRows((prev) =>
       prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
     );
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case "Active":
         return <span className="px-3 py-1 text-sm font-semibold text-green-600 rounded-full">● Active</span>;
@@ -55,7 +121,7 @@ const Paymenttracker = () => {
   const columns = useMemo(() => [
     {
       name: "",
-      cell: (row) => (
+      cell: (row: any) => (
         <input
           type="checkbox"
           checked={selectedRows.includes(row.id)}
@@ -66,15 +132,15 @@ const Paymenttracker = () => {
       width: "60px",
       ignoreRowClick: true,
     },
-    { name: "Name", selector: (row) => row.patient_name || "Unknown", sortable: true },
-    { name: "Phone", selector: (row) => row.phone || "Unknown", sortable: true },
-    { name: "Package", selector: (row) => row.package_name || "Unknown", sortable: true },
-    { name: "Start Date", selector: (row) => row.start_date || "Undefined", sortable: true },
-    { name: "Expiry Date", selector: (row) => row.end_date || "Undefined", sortable: true },
-    { name: "Status", cell: (row) => getStatusBadge(row.is_active), sortable: true },
+    { name: "Name", selector: (row: any) => row.patient_name || "Unknown", sortable: true },
+    { name: "Phone", selector: (row: any) => row.phone || "Unknown", sortable: true },
+    { name: "Package", selector: (row: any) => row.package_name || "Unknown", sortable: true },
+    { name: "Start Date", selector: (row: any) => row.start_date || "Undefined", sortable: true },
+    { name: "Expiry Date", selector: (row: any) => row.end_date || "Undefined", sortable: true },
+    { name: "Status", cell: (row: any) => getStatusBadge(row.is_active), sortable: true },
     {
       name: "Actions",
-      cell: (row) => (
+      cell: (row: any) => (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -111,10 +177,10 @@ const Paymenttracker = () => {
         <AlertCircle className="mr-2" /> {error}
       </div>
     );
-  } else if (subscriptions.length === 0) {
+  } else if (packages.length === 0) {
     contentToRender = (
       <div className="flex justify-center items-center p-8 text-gray-500">
-        No articles found matching your filters
+        No packages found
       </div>
     );
   } else {
@@ -124,33 +190,39 @@ const Paymenttracker = () => {
         data={packages}
         isLoading={loading}
         error={error}
+        paginationServer
+        paginationTotalRows={pagination?.count || 0}
+        onChangePage={(newPage) => setPage(newPage)}
+        onChangeRowsPerPage={(newPageSize, newPage) => {
+          setPageSize(newPageSize);
+          setPage(newPage);
+        }}
       />
     );
   }
-  
+
+  const stats = [
+    { title: "Total Active Subscribers", value: packagesSummary?.total_active_subscribers, change: "+10%", positive: true },
+    { title: "Expiring This Week", value: packagesSummary?.expiring_this_week, change: "-10%", positive: false },
+    { title: "Renewed This Month", value: packagesSummary?.renewed_this_month, change: "+10%", positive: true },
+    { title: "Overdue (Not Renewed)", value: packagesSummary?.overdue_not_renewed, change: "+10%", positive: true },
+  ];
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-bold text-[#7F375E] mb-6">Payment Tracker</h1>
 
-      {/* Stats Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { title: "Total Active Subscribers", value: 100, change: "+10%", positive: true },
-          { title: "Expiring This Week", value: 6, change: "-10%", positive: false },
-          { title: "Renewed This Month", value: 20, change: "+10%", positive: true },
-          { title: "Overdue (Not Renewed)", value: 100, change: "+10%", positive: true },
-        ].map((item, index) => (
+        {stats?.map((item, index) => (
           <div
             key={index}
             className="bg-white p-4 rounded-lg shadow border border-gray-200"
           >
             <p className="text-gray-600 text-sm">{item.title}</p>
-            <h2 className="text-2xl font-bold mt-2">{item.value}</h2>
+            <h2 className="text-2xl font-bold mt-2">{item.value ?? 0}</h2>
             <p
-              className={`text-sm font-semibold mt-1 ${
-                item.positive ? "text-green-600" : "text-red-600"
-              }`}
+              className={`text-sm font-semibold mt-1 ${item.positive ? "text-green-600" : "text-red-600"
+                }`}
             >
               {item.change}
             </p>
@@ -158,8 +230,7 @@ const Paymenttracker = () => {
         ))}
       </div>
 
-      {/* Controls Area */}
-      <div className="flex flex-col md:flex-row md:justify-between mb-6 gap-4">
+=      <div className="flex flex-col md:flex-row md:justify-between mb-6 gap-4">
         <h2 className="text-lg font-md text-black">Main Table View</h2>
 
         <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
@@ -173,7 +244,10 @@ const Paymenttracker = () => {
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full md:w-auto">
             <select
               value={packageFilter}
-              onChange={(e) => setPackageFilter(e.target.value)}
+              onChange={(e) => {
+                setPackageFilter(e.target.value);
+                setPage(1); // reset page when filter changes
+              }}
               className="flex-1 px-4 py-2 bg-[#F1F8FD] border border-gray-300 rounded-lg focus:outline-none text-black cursor-pointer"
             >
               <option value="Daraja">Daraja</option>
@@ -199,7 +273,6 @@ const Paymenttracker = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         {contentToRender}
       </div>
