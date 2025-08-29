@@ -68,8 +68,8 @@ export const sidebarMenuItems = [
     ),
   },
   {
-    path: "/dashboard/teleconsulatation",
-    label: "Teleconsultation tag",
+    path: "/dashboard/teleconsultation",
+    label: "Teleconsultation",
     renderIcon: (isActive) => (
       <svg
         xmlns="http://www.w3.org/2000/svg"
