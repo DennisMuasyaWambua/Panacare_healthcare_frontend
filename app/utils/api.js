@@ -1,5 +1,6 @@
 "use client";
 
+import { get } from 'http';
 import authUtils from './authUtils';
 
 
@@ -362,6 +363,10 @@ export const appointmentsAPI = {
   getAllAppointments: async () => {
     return await apiRequest("/api/appointments/", { method: "GET" });
   },
+
+  getAllAppointmentsenhanced: async (params) => {
+    return await apiRequest("/api/enhanced-appointments/", { method: "GET" });
+  },
   
   getAppointmentById: async (id) => {
     return await apiRequest(`/api/appointments/${id}/`, { method: "GET" });
@@ -511,6 +516,28 @@ export const packageTracker = {
   },
 };
 
+export const teleconsulatationAPI = {
+  getAllTeleconsulatations: async (params) => {
+    return await apiRequest("/api/teleconsultation-logs/", { 
+      method: "GET",
+      params 
+    });
+  },
+};
+
+export const followupAPI = {
+  getAllFollowups: async (params) => {
+    return await apiRequest("/api/follow-up-compliance/", { 
+      method: "GET",
+      params 
+    });
+  },
+  getFollowupSummary: async () => {
+    return await apiRequest("/api/follow-up-compliance/statistics/", { method: "GET" });
+  }
+}
+
+
 export default {
   authAPI,
   doctorsAPI,
@@ -520,5 +547,7 @@ export default {
   appointmentsAPI,
   packagesAPI,
   subscriptions,
-  packageTracker
+  packageTracker,
+  teleconsulatationAPI,
+  followupAPI,
 };
