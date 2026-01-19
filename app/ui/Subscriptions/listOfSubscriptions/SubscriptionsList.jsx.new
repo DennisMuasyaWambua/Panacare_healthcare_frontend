@@ -1,0 +1,278 @@
+"use client";
+import React, { useState } from "react";
+import { Loader2, AlertTriangle, Search, ChevronDown, Pencil } from "lucide-react";
+import PropTypes from "prop-types";
+
+const SubscriptionsList = ({ 
+  packages, 
+  loading, 
+  error, 
+  onRefresh, 
+  onExportPdf, 
+  onExportCsv 
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Active");
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-[#29AAE1]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg p-6 shadow-md text-center">
+        <div className="flex justify-center mb-4">
+          <AlertTriangle className="h-12 w-12 text-yellow-500" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Packages</h3>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={onRefresh}
+          className="px-4 py-2 bg-[#29AAE1] text-white rounded hover:bg-[#1c8bbf]"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!packages || packages.length === 0) {
+    return (
+      <div className="bg-white rounded-lg p-6 shadow-md text-center">
+        <p className="text-gray-600 mb-4">No subscription packages found.</p>
+        <button
+          onClick={onRefresh}
+          className="px-4 py-2 bg-[#29AAE1] text-white rounded hover:bg-[#1c8bbf]"
+        >
+          Refresh
+        </button>
+      </div>
+    );
+  }
+
+  // Filter packages based on search term and status filter
+  const filteredPackages = packages.filter((pkg) => {
+    const matchesSearch = pkg.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || 
+                          (statusFilter === "Active" && pkg.is_active) || 
+                          (statusFilter === "Inactive" && !pkg.is_active);
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <div className="bg-white rounded-lg shadow">
+      {/* Filter and Search Bar */}
+      <div className="p-5 border-b border-gray-200">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          {/* Search by Name */}
+          <div className="relative flex-grow max-w-sm">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search className="w-4 h-4 text-gray-500" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by Name"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#29AAE1] focus:border-[#29AAE1] text-sm"
+            />
+          </div>
+
+          {/* Filter by Status */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md focus:ring-[#29AAE1] focus:border-[#29AAE1] text-sm"
+              >
+                <option>All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </div>
+
+            {/* More Filters Button */}
+            <button
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm flex items-center gap-1 hover:bg-gray-50"
+            >
+              More Filters
+              <ChevronDown className={`w-4 h-4 transition-transform ${showMoreFilters ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Export Buttons */}
+            <button
+              onClick={onExportPdf}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+            >
+              Export PDF
+            </button>
+            <button
+              onClick={onExportCsv}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+            >
+              Export CSV
+            </button>
+
+            {/* Edit Button (matches the design) */}
+            <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
+              <Pencil className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* More Filters Panel (hidden by default) */}
+        {showMoreFilters && (
+          <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label htmlFor="price-min" className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="price-min"
+                    type="number"
+                    placeholder="Min"
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    id="price-max"
+                    type="number"
+                    placeholder="Max"
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="duration-days" className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
+                <input
+                  id="duration-days"
+                  type="number"
+                  placeholder="Enter days"
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="features-select" className="block text-sm font-medium text-gray-700 mb-1">Features</label>
+                <select 
+                  id="features-select"
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm appearance-none"
+                >
+                  <option value="">Select Feature</option>
+                  <option value="priority_support">Priority Support</option>
+                  <option value="access_to_resources">Access to Resources</option>
+                  <option value="video_consultation">Video Consultation</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button className="px-4 py-2 bg-[#29AAE1] text-white rounded-md text-sm">
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Subscription Table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-4 py-3 text-left">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-[#29AAE1] border-gray-300 rounded focus:ring-[#29AAE1]"
+                  />
+                </div>
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Subscription Name
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date Created
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Last Active
+              </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredPackages.map((pkg) => (
+              <tr 
+                key={pkg.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={(e) => {
+                  // Prevent navigation if clicking on checkbox
+                  if (e.target.type !== 'checkbox') {
+                    window.location.href = `/dashboard/subscriptions/view/${pkg.id}`;
+                  }
+                }}
+              >
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-[#29AAE1] border-gray-300 rounded focus:ring-[#29AAE1]"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                </td>
+                <td className="px-4 py-4">
+                  <div className="text-sm font-medium text-[#29AAE1] hover:underline">
+                    {pkg.name}
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">KES {pkg.price}</div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">15 August 2023</div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">16 August 2023</div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    pkg.is_active
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {pkg.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+SubscriptionsList.propTypes = {
+  packages: PropTypes.array,
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  onRefresh: PropTypes.func.isRequired,
+  onExportPdf: PropTypes.func.isRequired,
+  onExportCsv: PropTypes.func.isRequired,
+};
+
+export default SubscriptionsList;
